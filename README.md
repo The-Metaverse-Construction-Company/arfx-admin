@@ -1,4 +1,4 @@
-# ARfx Home Studio Portal
+# ARfx Home Studio Admin Portal
 
 ## Available Scripts
 

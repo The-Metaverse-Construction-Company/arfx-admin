@@ -1,14 +1,30 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
+import { render } from 'react-dom';
+import { createMuiTheme, CssBaseline, ThemeProvider } from '@material-ui/core';
+import { red } from '@material-ui/core/colors';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import 'fontsource-roboto';
+import "./index.css";
+import reportWebVitals from "./reportWebVitals";
 
-ReactDOM.render(
+const darkTheme = createMuiTheme({
+  palette: {
+    type: "dark",
+    primary: red,
+    background: {
+      default: "#202124",
+    },
+  },
+});
+
+render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function
