@@ -1,6 +1,6 @@
-import { Box, makeStyles } from '@material-ui/core';
-import React from 'react';
-import { Switch, Route, Redirect, BrowserRouter } from 'react-router-dom';
+import { Box, makeStyles } from "@material-ui/core";
+import React from "react";
+import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
 import {
   NavBar,
   Settings,
@@ -9,22 +9,23 @@ import {
   SignInContent,
   Scenes,
   Users,
-} from './components';
-import Routes from './constants/Routes';
+  SceneDetails,
+} from "./components";
+import Routes from "./constants/Routes";
 
 // Added scrollbar height for content box using link: https://codesandbox.io/s/rmll8r8qvp?file=/PageContent.jsx
 const useStyles = makeStyles((theme) => ({
   contentBox: {
     height: `calc(100vh - 56px - 8px)`,
-    [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
+    [`${theme.breakpoints.up("xs")} and (orientation: landscape)`]: {
       height: `calc(100vh - 48px - 8px)`,
     },
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up("sm")]: {
       height: `calc(100vh - 64px - 8px)`,
     },
   },
   contentContainer: {
-    height: '100%',
+    height: "100%",
   },
 }));
 
@@ -58,6 +59,11 @@ const App: React.FunctionComponent = () => {
             <Route exact path={Routes.SCENES} component={Scenes} />
             <Route exact path={Routes.USERS} component={Users} />
             <Route exact path={Routes.SETTINGS} component={Settings} />
+            <Route
+              exact
+              path={[`${Routes.SCENES}/:sceneId`, `${Routes.SCENES}/new`]}
+              component={SceneDetails}
+            />
           </Switch>
         </Box>
       </BrowserRouter>

@@ -6,10 +6,6 @@ import logoImg from '../assets/images/arfx_logo.png';
 import Routes from '../constants/Routes';
 
 const useStyles = makeStyles((theme) => ({
-  topBoarder: {
-    background: 'linear-gradient(90deg, #00FFFF 0%, #FE0101 100%)',
-    height: theme.spacing(1),
-  },
   appBar: {
     background: 'transparent',
   },
@@ -68,7 +64,6 @@ const NavBar: React.FunctionComponent = () => {
   return (
     <>
       <CssBaseline />
-      <Box className={classes.topBoarder} />
       <AppBar className={classes.appBar} position="sticky">
         <Toolbar>
           <img className={classes.logo} src={logoImg} alt="ARfx Home Studio" />

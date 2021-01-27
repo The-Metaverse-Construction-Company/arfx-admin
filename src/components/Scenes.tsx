@@ -2,6 +2,8 @@ import { Box, Button, Container, makeStyles } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { SceneGrid, SceneItem, ScrollableBox } from ".";
 import AddIcon from "@material-ui/icons/Add";
+import { useHistory } from "react-router-dom";
+import Routes from "../constants/Routes";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -70,11 +72,11 @@ const items: SceneItem[] = [
   },
 ];
 
-function getScenes(count: number) {
+function getScenes(count: number, currentCount: number) {
   let newItems: SceneItem[] = [];
   for (let loop = 0; loop < count; loop++) {
     newItems.push({
-      key: `s${items.length + 1}`,
+      key: `s${currentCount + 1 + loop}`,
       title: "Scene Title",
       description:
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
@@ -87,10 +89,11 @@ function getScenes(count: number) {
 
 const Scenes: React.FunctionComponent = () => {
   const classes = useStyles();
+  const history = useHistory();
   const [sceneItems, setSceneItems] = useState<SceneItem[]>([]);
 
   useEffect(() => {
-    let newScenes = getScenes(41);
+    let newScenes = getScenes(41, items.length);
     setSceneItems([...items, ...newScenes]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -98,7 +101,7 @@ const Scenes: React.FunctionComponent = () => {
   return (
     <ScrollableBox
       onScrollBottom={() => {
-        let newScenes = getScenes(20);
+        let newScenes = getScenes(20, sceneItems.length);
         setSceneItems([...sceneItems, ...newScenes]);
       }}
     >
@@ -108,6 +111,9 @@ const Scenes: React.FunctionComponent = () => {
           color="primary"
           size="large"
           startIcon={<AddIcon />}
+          onClick={() => {
+            history.push(`${Routes.SCENES}/new`);
+          }}
         >
           New Scene
         </Button>

@@ -1,9 +1,9 @@
-import React from 'react';
-import { render } from 'react-dom';
-import { createMuiTheme, CssBaseline, ThemeProvider } from '@material-ui/core';
-import { red } from '@material-ui/core/colors';
-import App from './App';
-import 'fontsource-roboto';
+import React from "react";
+import { render } from "react-dom";
+import { createMuiTheme, CssBaseline, ThemeProvider } from "@material-ui/core";
+import { red } from "@material-ui/core/colors";
+import App from "./App";
+import "fontsource-roboto";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
@@ -18,12 +18,10 @@ const darkTheme = createMuiTheme({
 });
 
 render(
-  <React.StrictMode>
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
-  </React.StrictMode>,
+  <ThemeProvider theme={darkTheme}>
+    <CssBaseline />
+    <App />
+  </ThemeProvider>,
   document.getElementById("root")
 );
 
