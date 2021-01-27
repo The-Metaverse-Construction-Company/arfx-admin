@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
     textShadow: '1px 1px 5px black',
     height: 80,
     '& .MuiGridListTileBar-title': {
-      fontSize: 30,
+      fontSize: 24,
       lineHeight: 'inherit',
     },
     '& .MuiGridListTileBar-subtitle': {
@@ -86,14 +86,14 @@ const SceneGrid: React.FunctionComponent<WithWidthProps & SceneGridProps> = (
   // https://stackoverflow.com/a/53463748/2077741
   const getGridListCols = () => {
     if (width && isWidthUp('lg', width)) {
-      return 3;
+      return 5;
     }
 
     if (width && isWidthUp('md', width)) {
-      return 2;
+      return 3;
     }
 
-    return 1;
+    return 2;
   };
 
   return (
@@ -104,7 +104,7 @@ const SceneGrid: React.FunctionComponent<WithWidthProps & SceneGridProps> = (
     >
       <GridList
         className={`${isHorizontal && classes.gridListHorizontal}`}
-        cellHeight={200}
+        cellHeight={150}
         cols={getGridListCols()}
         spacing={8}
       >
