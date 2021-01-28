@@ -57,7 +57,7 @@ const App: React.FunctionComponent = () => {
               <Redirect to={Routes.SCENES} />
             </Route>
             <Route exact path={Routes.SCENES} component={Scenes} />
-            <Route exact path={Routes.USERS} component={Users} />
+            <Route path={Routes.USERS} component={Users} />
             <Route exact path={Routes.SETTINGS} component={Settings} />
             <Route
               exact
