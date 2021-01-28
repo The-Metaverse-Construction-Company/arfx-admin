@@ -3,6 +3,7 @@ import {
   Button,
   Container,
   Grid,
+  IconButton,
   InputAdornment,
   makeStyles,
   TextField,
@@ -11,11 +12,12 @@ import {
 import React, { useReducer } from "react";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { ActionResult } from "../models/Action";
-import { IBasePayload, IFilesPayload } from "../models/IPayloads";
+import { IBasePayload, IFilePayload } from "../models/IPayloads";
 import { ConfirmDialog, ScrollableBox } from ".";
+import Routes from "../constants/Routes";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import Routes from "../constants/Routes";
+import CloseIcon from "@material-ui/icons/Close";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -61,19 +63,18 @@ const useStyles = makeStyles((theme) => ({
 
 // Local state
 interface ILocalState {
-  sceneFiles: File[];
+  sceneFile?: File;
   showDeleteDialog: boolean;
 }
 
 // Local default state
 const DefaultLocalState: ILocalState = {
-  sceneFiles: [],
   showDeleteDialog: false,
 };
 
 // Local actions
 const LocalAction = {
-  AddFiles: "AddFiles",
+  AddFile: "AddFile",
   AddVideo: "AddVideo",
   ToggleDeleteDialog: "ToggleDeleteDialog",
 };
@@ -84,10 +85,10 @@ const LocalReducer = (
   action: ActionResult<IBasePayload>
 ): ILocalState => {
   switch (action.type) {
-    case LocalAction.AddFiles: {
+    case LocalAction.AddFile: {
       return {
         ...state,
-        sceneFiles: (action.payload as IFilesPayload).files,
+        sceneFile: (action.payload as IFilePayload).file,
       };
     }
     case LocalAction.ToggleDeleteDialog: {
@@ -127,13 +128,22 @@ const SceneDetails: React.FunctionComponent = () => {
               Current Scene
             </Typography>
 
-            {Array.from(state.sceneFiles).map((file) => {
-              return (
-                <Typography key={file.name} variant="caption">
-                  {file.name}
-                </Typography>
-              );
-            })}
+            {state.sceneFile && (
+              <Typography key={state.sceneFile.name} variant="caption">
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    dispatch({
+                      type: LocalAction.AddFile,
+                      payload: { file: undefined },
+                    })
+                  }
+                >
+                  <CloseIcon />
+                </IconButton>
+                {state.sceneFile.name}
+              </Typography>
+            )}
 
             <br />
             <Button
@@ -150,11 +160,14 @@ const SceneDetails: React.FunctionComponent = () => {
                 hidden
                 onChange={(event: React.SyntheticEvent) => {
                   if (event.target) {
-                    let newFiles: File[] = (event.target as any).files;
-                    dispatch({
-                      type: LocalAction.AddFiles,
-                      payload: { files: newFiles },
-                    });
+                    let fileList = (event.target as any).files;
+
+                    if (fileList.length > 0) {
+                      dispatch({
+                        type: LocalAction.AddFile,
+                        payload: { file: fileList[0] },
+                      });
+                    }
                   }
                 }}
               />
@@ -209,11 +222,14 @@ const SceneDetails: React.FunctionComponent = () => {
                   hidden
                   onChange={(event: React.SyntheticEvent) => {
                     if (event.target) {
-                      let newFiles: File[] = (event.target as any).files;
-                      dispatch({
-                        type: LocalAction.AddVideo,
-                        payload: { files: newFiles },
-                      });
+                      let fileList = (event.target as any).files;
+
+                      if (fileList.length > 0) {
+                        dispatch({
+                          type: LocalAction.AddVideo,
+                          payload: { file: fileList[0] },
+                        });
+                      }
                     }
                   }}
                 />

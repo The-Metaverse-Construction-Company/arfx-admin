@@ -11,6 +11,10 @@ export interface IBooleanPayload extends IBasePayload {
   key?: string;
   boolean: boolean;
 }
+export interface IFilePayload extends IBasePayload {
+  key?: string;
+  file: File;
+}
 export interface IFilesPayload extends IBasePayload {
   key?: string;
   files: File[];
