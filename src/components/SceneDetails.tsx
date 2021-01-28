@@ -14,6 +14,7 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { ActionResult } from "../models/Action";
 import { IBasePayload, IFilePayload } from "../models/IPayloads";
 import { ConfirmDialog, ScrollableBox } from ".";
+import ReactPlayer from "react-player";
 import Routes from "../constants/Routes";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
@@ -29,6 +30,19 @@ const useStyles = makeStyles((theme) => ({
   },
   sceneTitle: {
     marginBottom: theme.spacing(2),
+  },
+  previewBox: {
+    height: 100,
+    width: 200,
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    borderRadius: theme.spacing(0.5),
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  previewImg: {
+    maxHeight: 98,
+    maxWidth: 198,
   },
   uploadSceneBtn: {
     marginTop: theme.spacing(1),
@@ -51,6 +65,12 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     height: "100%",
   },
+  videoPlayer: {
+    marginTop: theme.spacing(2),
+    '& video': {
+      outline: 'none' /** https://github.com/mui-org/material-ui/issues/11504 */,
+    },
+  },
   btnsBox: {
     marginTop: theme.spacing(4),
   },
@@ -63,7 +83,10 @@ const useStyles = makeStyles((theme) => ({
 
 // Local state
 interface ILocalState {
-  sceneFile?: File;
+  sceneImage?: File;
+  sceneImageUrl?: string;
+  sceneVideo?: File;
+  sceneVideoUrl?: string;
   showDeleteDialog: boolean;
 }
 
@@ -74,7 +97,7 @@ const DefaultLocalState: ILocalState = {
 
 // Local actions
 const LocalAction = {
-  AddFile: "AddFile",
+  AddImage: "AddImage",
   AddVideo: "AddVideo",
   ToggleDeleteDialog: "ToggleDeleteDialog",
 };
@@ -85,10 +108,20 @@ const LocalReducer = (
   action: ActionResult<IBasePayload>
 ): ILocalState => {
   switch (action.type) {
-    case LocalAction.AddFile: {
+    case LocalAction.AddImage: {
+      let file = (action.payload as IFilePayload).file;
       return {
         ...state,
-        sceneFile: (action.payload as IFilePayload).file,
+        sceneImage: file,
+        sceneImageUrl: file ? URL.createObjectURL(file) : undefined,
+      };
+    }
+    case LocalAction.AddVideo: {
+      let file = (action.payload as IFilePayload).file;
+      return {
+        ...state,
+        sceneVideo: file,
+        sceneVideoUrl: file ? URL.createObjectURL(file) : undefined,
       };
     }
     case LocalAction.ToggleDeleteDialog: {
@@ -111,6 +144,39 @@ const SceneDetails: React.FunctionComponent = () => {
     path: `${Routes.SCENES}/new`,
   });
 
+  const UploadVideoBtn = () => {
+    return (
+      <Button
+        component="label"
+        variant="contained"
+        color="primary"
+        startIcon={<CloudUploadIcon />}
+      >
+        Upload Video
+        <input
+          type="file"
+          accept="video/*"
+          hidden
+          onClick={(event) =>
+            ((event.target as any).value = "")
+          } /** https://stackoverflow.com/a/54632736/2077741 */
+          onChange={(event: React.SyntheticEvent) => {
+            if (event.target) {
+              let fileList = (event.target as any).files;
+
+              if (fileList.length > 0) {
+                dispatch({
+                  type: LocalAction.AddVideo,
+                  payload: { file: fileList[0] },
+                });
+              }
+            }
+          }}
+        />
+      </Button>
+    );
+  };
+
   return (
     <ScrollableBox>
       <Container className={classes.container} disableGutters>
@@ -128,20 +194,30 @@ const SceneDetails: React.FunctionComponent = () => {
               Current Scene
             </Typography>
 
-            {state.sceneFile && (
-              <Typography key={state.sceneFile.name} variant="caption">
+            <Box className={classes.previewBox}>
+              {state.sceneImage && (
+                <img
+                  className={classes.previewImg}
+                  src={state.sceneImageUrl}
+                  alt="Scene Preview"
+                />
+              )}
+            </Box>
+
+            {state.sceneImage && (
+              <Typography key={state.sceneImage.name} variant="caption">
                 <IconButton
                   size="small"
                   onClick={() =>
                     dispatch({
-                      type: LocalAction.AddFile,
+                      type: LocalAction.AddImage,
                       payload: { file: undefined },
                     })
                   }
                 >
                   <CloseIcon />
                 </IconButton>
-                {state.sceneFile.name}
+                {state.sceneImage.name}
               </Typography>
             )}
 
@@ -158,13 +234,16 @@ const SceneDetails: React.FunctionComponent = () => {
                 type="file"
                 accept=".png, .jpg, .jpeg"
                 hidden
+                onClick={(event) =>
+                  ((event.target as any).value = "")
+                } /** https://stackoverflow.com/a/54632736/2077741 */
                 onChange={(event: React.SyntheticEvent) => {
                   if (event.target) {
                     let fileList = (event.target as any).files;
 
                     if (fileList.length > 0) {
                       dispatch({
-                        type: LocalAction.AddFile,
+                        type: LocalAction.AddImage,
                         payload: { file: fileList[0] },
                       });
                     }
@@ -206,35 +285,50 @@ const SceneDetails: React.FunctionComponent = () => {
             />
           </Grid>
           <Grid className={classes.previewGrid} item xs={9}>
-            <Typography>Preview Clip</Typography>
+            <Grid container>
+              <Grid item xs>
+                <Typography>Preview Clip</Typography>
 
-            <Box className={classes.videoBox}>
-              <Button
-                component="label"
-                variant="contained"
-                color="primary"
-                startIcon={<CloudUploadIcon />}
-              >
-                Upload Video
-                <input
-                  type="file"
-                  accept="video/*"
-                  hidden
-                  onChange={(event: React.SyntheticEvent) => {
-                    if (event.target) {
-                      let fileList = (event.target as any).files;
-
-                      if (fileList.length > 0) {
+                {state.sceneVideo && (
+                  <Typography key={state.sceneVideo.name} variant="caption">
+                    <IconButton
+                      size="small"
+                      onClick={() =>
                         dispatch({
                           type: LocalAction.AddVideo,
-                          payload: { file: fileList[0] },
-                        });
+                          payload: { file: undefined },
+                        })
                       }
-                    }
-                  }}
-                />
-              </Button>
-            </Box>
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                    {state.sceneVideo.name}
+                  </Typography>
+                )}
+              </Grid>
+
+              {state.sceneVideo && (
+                <Grid item>
+                  <UploadVideoBtn />
+                </Grid>
+              )}
+              
+            </Grid>
+
+            {state.sceneVideo && (
+              <ReactPlayer
+                className={classes.videoPlayer}
+                url={state.sceneVideoUrl}
+                width="100%"
+                height="100%"
+                controls={true}
+              />
+            )}
+            {!state.sceneVideo && (
+              <Box className={classes.videoBox}>
+                <UploadVideoBtn />
+              </Box>
+            )}
           </Grid>
         </Grid>
 
