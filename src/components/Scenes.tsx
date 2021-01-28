@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: theme.spacing(3),
   },
-  sceneGrid: {
+  sceneBox: {
     marginTop: theme.spacing(2),
   },
 }));
@@ -120,7 +120,7 @@ const Scenes: React.FunctionComponent = () => {
 
         <br />
 
-        <Box className={classes.sceneGrid}>
+        <Box className={classes.sceneBox}>
           <SceneGrid items={sceneItems} />
         </Box>
       </Container>

@@ -44,12 +44,11 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: 98,
     maxWidth: 198,
   },
-  uploadSceneBtn: {
-    marginTop: theme.spacing(1),
+  uploadPreviewBtn: {
     marginBottom: theme.spacing(4),
   },
   priceTxtBox: {
-    marginBottom: 0,
+    marginBottom: theme.spacing(4),
   },
   previewGrid: {
     display: "flex",
@@ -66,9 +65,9 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
   },
   videoPlayer: {
-    marginTop: theme.spacing(2),
-    '& video': {
-      outline: 'none' /** https://github.com/mui-org/material-ui/issues/11504 */,
+    "& video": {
+      outline:
+        "none" /** https://github.com/mui-org/material-ui/issues/11504 */,
     },
   },
   btnsBox: {
@@ -87,6 +86,7 @@ interface ILocalState {
   sceneImageUrl?: string;
   sceneVideo?: File;
   sceneVideoUrl?: string;
+  sceneFile?: File;
   showDeleteDialog: boolean;
 }
 
@@ -99,6 +99,7 @@ const DefaultLocalState: ILocalState = {
 const LocalAction = {
   AddImage: "AddImage",
   AddVideo: "AddVideo",
+  AddSceneFile: "AddSceneFile",
   ToggleDeleteDialog: "ToggleDeleteDialog",
 };
 
@@ -122,6 +123,13 @@ const LocalReducer = (
         ...state,
         sceneVideo: file,
         sceneVideoUrl: file ? URL.createObjectURL(file) : undefined,
+      };
+    }
+    case LocalAction.AddSceneFile: {
+      let file = (action.payload as IFilePayload).file;
+      return {
+        ...state,
+        sceneFile: file,
       };
     }
     case LocalAction.ToggleDeleteDialog: {
@@ -191,7 +199,7 @@ const SceneDetails: React.FunctionComponent = () => {
         <Grid className={classes.grid} spacing={3} container>
           <Grid item xs={3}>
             <Typography className={classes.sceneTitle}>
-              Current Scene
+              Scene Details
             </Typography>
 
             <Box className={classes.previewBox}>
@@ -223,13 +231,13 @@ const SceneDetails: React.FunctionComponent = () => {
 
             <br />
             <Button
-              className={classes.uploadSceneBtn}
+              className={classes.uploadPreviewBtn}
               component="label"
               variant="contained"
               color="primary"
               startIcon={<CloudUploadIcon />}
             >
-              Upload Scene
+              Upload Preview
               <input
                 type="file"
                 accept=".png, .jpg, .jpeg"
@@ -283,6 +291,53 @@ const SceneDetails: React.FunctionComponent = () => {
                 ),
               }}
             />
+
+            <br />
+            {state.sceneFile && (
+              <Typography key={state.sceneFile.name} variant="caption">
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    dispatch({
+                      type: LocalAction.AddSceneFile,
+                      payload: { file: undefined },
+                    })
+                  }
+                >
+                  <CloseIcon />
+                </IconButton>
+                {state.sceneFile.name}
+              </Typography>
+            )}
+            <br />
+            <Button
+              component="label"
+              variant="contained"
+              color="primary"
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload Scene Files
+              <input
+                type="file"
+                accept=".zip"
+                hidden
+                onClick={(event) =>
+                  ((event.target as any).value = "")
+                } /** https://stackoverflow.com/a/54632736/2077741 */
+                onChange={(event: React.SyntheticEvent) => {
+                  if (event.target) {
+                    let fileList = (event.target as any).files;
+
+                    if (fileList.length > 0) {
+                      dispatch({
+                        type: LocalAction.AddSceneFile,
+                        payload: { file: fileList[0] },
+                      });
+                    }
+                  }
+                }}
+              />
+            </Button>
           </Grid>
           <Grid className={classes.previewGrid} item xs={9}>
             <Grid container>
@@ -312,7 +367,6 @@ const SceneDetails: React.FunctionComponent = () => {
                   <UploadVideoBtn />
                 </Grid>
               )}
-              
             </Grid>
 
             {state.sceneVideo && (
