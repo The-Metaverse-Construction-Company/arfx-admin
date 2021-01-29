@@ -1,5 +1,7 @@
 /* eslint-disable import/no-cycle */
+export { default as AccountTypeDialog } from './Dialogs/AccountTypeDialog';
 export { default as ConfirmDialog } from './Dialogs/ConfirmDialog';
+export { default as EmailDialog } from './Dialogs/EmailDialog';
 export { default as PasswordDialog } from './Dialogs/PasswordDialog';
 
 export { default as LoginContainer } from './Login/LoginContainer';

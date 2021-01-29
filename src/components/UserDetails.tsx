@@ -1,6 +1,7 @@
 import { Box, Button, makeStyles, Typography } from "@material-ui/core";
 import React, { useReducer } from "react";
 import { useRouteMatch } from "react-router-dom";
+import { AccountTypeDialog, ConfirmDialog, EmailDialog, PasswordDialog } from ".";
 import Routes from "../constants/Routes";
 import { ActionResult } from "../models/Action";
 import { IBasePayload } from "../models/IPayloads";
@@ -28,20 +29,26 @@ interface MenuItem {
 
 // Local state
 interface ILocalState {
+  showAccountTypeDialog: boolean;
   showDeleteDialog: boolean;
-  showPasswordDialog: boolean;
+  showEmailDialog: boolean;
+  showSendPasswordDialog: boolean;
 }
 
 // Local default state
 const DefaultLocalState: ILocalState = {
+  showAccountTypeDialog: false,
   showDeleteDialog: false,
-  showPasswordDialog: false,
+  showEmailDialog: false,
+  showSendPasswordDialog: false,
 };
 
 // Local actions
 const LocalAction = {
+  ToggleAccountTypeDialog: "ToggleAccountTypeDialog",
   ToggleDeleteDialog: "ToggleDeleteDialog",
-  TogglePasswordDialog: "TogglePasswordDialog",
+  ToggleEmailDialog: 'ToggleEmailDialog',
+  ToggleSendPasswordDialog: "ToggleSendPasswordDialog",
 };
 
 // Local reducer
@@ -50,11 +57,17 @@ const LocalReducer = (
   action: ActionResult<IBasePayload>
 ): ILocalState => {
   switch (action.type) {
+    case LocalAction.ToggleAccountTypeDialog: {
+      return { ...state, showAccountTypeDialog: !state.showAccountTypeDialog };
+    }
     case LocalAction.ToggleDeleteDialog: {
       return { ...state, showDeleteDialog: !state.showDeleteDialog };
     }
-    case LocalAction.TogglePasswordDialog: {
-      return { ...state, showPasswordDialog: !state.showPasswordDialog };
+    case LocalAction.ToggleEmailDialog: {
+      return { ...state, showEmailDialog: !state.showEmailDialog };
+    }
+    case LocalAction.ToggleSendPasswordDialog: {
+      return { ...state, showSendPasswordDialog: !state.showSendPasswordDialog };
     }
     default: {
       return state;
@@ -75,7 +88,7 @@ const UserDetails: React.FunctionComponent = () => {
       label: "Change Type",
       onClick: () =>
         dispatch({
-          type: LocalAction.TogglePasswordDialog,
+          type: LocalAction.ToggleAccountTypeDialog,
         }),
     },
     {
@@ -83,7 +96,7 @@ const UserDetails: React.FunctionComponent = () => {
       label: "Change Email",
       onClick: () =>
         dispatch({
-          type: LocalAction.TogglePasswordDialog,
+          type: LocalAction.ToggleEmailDialog,
         }),
     },
     {
@@ -91,7 +104,7 @@ const UserDetails: React.FunctionComponent = () => {
       label: "Send New Password",
       onClick: () =>
         dispatch({
-          type: LocalAction.TogglePasswordDialog,
+          type: LocalAction.ToggleSendPasswordDialog,
         }),
     },
     {
@@ -112,6 +125,9 @@ const UserDetails: React.FunctionComponent = () => {
 
   return (
     <Box className={classes.rootBox}>
+      <Typography variant="h5" gutterBottom>
+        Settings For
+      </Typography>
       <Typography gutterBottom>
         <span className={classes.detailsText}>Email: </span>hanzlamateen{userId}
         @live.com
@@ -138,6 +154,74 @@ const UserDetails: React.FunctionComponent = () => {
           );
         })}
       </Box>
+      
+      <AccountTypeDialog
+        title="Change Type"
+        description={`Please select account type for "hanzlamateen${userId}@live.com".`}
+        open={state.showAccountTypeDialog}
+        currentAccountType="user"
+        onClose={() =>
+          dispatch({
+            type: LocalAction.ToggleAccountTypeDialog,
+          })
+        }
+        onSuccess={(type) => {
+          console.log(type);
+          dispatch({
+            type: LocalAction.ToggleAccountTypeDialog,
+          });
+        }}
+      />
+
+      <EmailDialog
+        title="Change Email"
+        description={`Please enter new email address for "hanzlamateen${userId}@live.com" account.`}
+        open={state.showEmailDialog}
+        onClose={() =>
+          dispatch({
+            type: LocalAction.ToggleEmailDialog,
+          })
+        }
+        onSuccess={(email) => {
+          console.log(email);
+          dispatch({
+            type: LocalAction.ToggleEmailDialog,
+          });
+        }}
+      />
+      
+      <ConfirmDialog
+        title="Send New Password"
+        description={`Are you sure you want to send new  password for "hanzlamateen${userId}@live.com" account?`}
+        open={state.showSendPasswordDialog}
+        onClose={() =>
+          dispatch({
+            type: LocalAction.ToggleSendPasswordDialog,
+          })
+        }
+        onSuccess={() =>
+          dispatch({
+            type: LocalAction.ToggleSendPasswordDialog,
+          })
+        }
+      />
+
+      <PasswordDialog
+        title="Delete Account"
+        description={`Are you sure you want to permanently delete "hanzlamateen${userId}@live.com" account? If so, please confirm your password to proceed.`}
+        open={state.showDeleteDialog}
+        onClose={() =>
+          dispatch({
+            type: LocalAction.ToggleDeleteDialog,
+          })
+        }
+        onSuccess={(passwordArgs) => {
+          console.log(passwordArgs);
+          dispatch({
+            type: LocalAction.ToggleDeleteDialog,
+          });
+        }}
+      />
     </Box>
   );
 };

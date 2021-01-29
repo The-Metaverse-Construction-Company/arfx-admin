@@ -5,8 +5,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-} from '@material-ui/core';
-import React from 'react';
+} from "@material-ui/core";
+import React from "react";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -21,11 +21,9 @@ const ConfirmDialog: React.FunctionComponent<ConfirmDialogProps> = (
 ) => {
   return (
     <Dialog open={Props.open} onClose={Props.onClose} maxWidth="sm" fullWidth>
-      <DialogTitle id="alert-dialog-title">{Props.title}</DialogTitle>
+      <DialogTitle>{Props.title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          {Props.description}
-        </DialogContentText>
+        <DialogContentText>{Props.description}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={Props.onClose}>Cancel</Button>

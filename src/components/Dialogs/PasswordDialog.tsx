@@ -9,12 +9,12 @@ import {
   InputAdornment,
   TextField,
   Typography,
-} from '@material-ui/core';
-import { Visibility, VisibilityOff } from '@material-ui/icons';
-import React, { useEffect, useReducer } from 'react';
-import { cloneDeep } from 'lodash';
-import { ActionResult } from '../../models/Action';
-import { IBasePayload, IStringPayload } from '../../models/IPayloads';
+} from "@material-ui/core";
+import { Visibility, VisibilityOff } from "@material-ui/icons";
+import React, { useEffect, useReducer } from "react";
+import { cloneDeep } from "lodash";
+import { ActionResult } from "../../models/Action";
+import { IBasePayload, IStringPayload } from "../../models/IPayloads";
 
 interface PasswordDialogProps {
   open: boolean;
@@ -36,8 +36,8 @@ interface PasswordItem {
   showPassword: boolean;
 }
 const DefaultPasswordItem: PasswordItem = {
-  password: '',
-  error: '',
+  password: "",
+  error: "",
   showPassword: false,
 };
 
@@ -57,16 +57,16 @@ const DefaultLocalState: ILocalState = {
 
 // Local actions
 const LocalAction = {
-  Reset: 'Reset',
-  SetCurrentPassword: 'SetCurrentPassword',
-  SetCurrentPasswordError: 'SetCurrentPasswordError',
-  ToggleCurrentPassword: 'ToggleCurrentPassword',
-  SetNewPassword: 'SetNewPassword',
-  SetNewPasswordError: 'SetNewPasswordError',
-  ToggleNewPassword: 'ToggleNewPassword',
-  SetConfirmPassword: 'SetConfirmPassword',
-  SetConfirmPasswordError: 'SetConfirmPasswordError',
-  ToggleConfirmPassword: 'ToggleConfirmPassword',
+  Reset: "Reset",
+  SetCurrentPassword: "SetCurrentPassword",
+  SetCurrentPasswordError: "SetCurrentPasswordError",
+  ToggleCurrentPassword: "ToggleCurrentPassword",
+  SetNewPassword: "SetNewPassword",
+  SetNewPasswordError: "SetNewPasswordError",
+  ToggleNewPassword: "ToggleNewPassword",
+  SetConfirmPassword: "SetConfirmPassword",
+  SetConfirmPasswordError: "SetConfirmPasswordError",
+  ToggleConfirmPassword: "ToggleConfirmPassword",
 };
 
 // Local reducer
@@ -87,8 +87,8 @@ const LocalReducer = (
     case LocalAction.SetCurrentPasswordError: {
       const newState = cloneDeep(state);
       newState.currentPassword.error = (action.payload as IStringPayload).string;
-      newState.newPassword.error = '';
-      newState.confirmPassword.error = '';
+      newState.newPassword.error = "";
+      newState.confirmPassword.error = "";
       return newState;
     }
     case LocalAction.ToggleCurrentPassword: {
@@ -104,9 +104,9 @@ const LocalReducer = (
     }
     case LocalAction.SetNewPasswordError: {
       const newState = cloneDeep(state);
-      newState.currentPassword.error = '';
+      newState.currentPassword.error = "";
       newState.newPassword.error = (action.payload as IStringPayload).string;
-      newState.confirmPassword.error = '';
+      newState.confirmPassword.error = "";
       return newState;
     }
     case LocalAction.ToggleNewPassword: {
@@ -121,8 +121,8 @@ const LocalReducer = (
     }
     case LocalAction.SetConfirmPasswordError: {
       const newState = cloneDeep(state);
-      newState.currentPassword.error = '';
-      newState.newPassword.error = '';
+      newState.currentPassword.error = "";
+      newState.newPassword.error = "";
       newState.confirmPassword.error = (action.payload as IStringPayload).string;
       return newState;
     }
@@ -155,17 +155,17 @@ const PasswordDialog: React.FunctionComponent<PasswordDialogProps> = (
     if (!state.currentPassword.password) {
       dispatch({
         type: LocalAction.SetCurrentPasswordError,
-        payload: { string: 'Required' },
+        payload: { string: "Required" },
       });
     } else if (Props.newPasswordMode && !state.newPassword.password) {
       dispatch({
         type: LocalAction.SetNewPasswordError,
-        payload: { string: 'Required' },
+        payload: { string: "Required" },
       });
     } else if (Props.newPasswordMode && !state.confirmPassword.password) {
       dispatch({
         type: LocalAction.SetConfirmPasswordError,
-        payload: { string: 'Required' },
+        payload: { string: "Required" },
       });
     } else if (
       Props.newPasswordMode &&
@@ -173,7 +173,7 @@ const PasswordDialog: React.FunctionComponent<PasswordDialogProps> = (
     ) {
       dispatch({
         type: LocalAction.SetConfirmPasswordError,
-        payload: { string: 'Passwords must match' },
+        payload: { string: "Passwords must match" },
       });
     } else {
       Props.onSuccess({
@@ -185,18 +185,16 @@ const PasswordDialog: React.FunctionComponent<PasswordDialogProps> = (
 
   return (
     <Dialog open={Props.open} onClose={Props.onClose} maxWidth="sm" fullWidth>
-      <DialogTitle id="alert-dialog-title">{Props.title}</DialogTitle>
+      <DialogTitle>{Props.title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          {Props.description}
-        </DialogContentText>
+        <DialogContentText>{Props.description}</DialogContentText>
         <TextField
           autoFocus
           variant="outlined"
           margin="normal"
           id="currentPassword"
           label="Current Password"
-          type={state.currentPassword.showPassword ? 'text' : 'password'}
+          type={state.currentPassword.showPassword ? "text" : "password"}
           fullWidth
           InputProps={{
             endAdornment: (
@@ -235,7 +233,7 @@ const PasswordDialog: React.FunctionComponent<PasswordDialogProps> = (
               margin="normal"
               id="newPassword"
               label="New Password"
-              type={state.newPassword.showPassword ? 'text' : 'password'}
+              type={state.newPassword.showPassword ? "text" : "password"}
               fullWidth
               InputProps={{
                 endAdornment: (
@@ -273,7 +271,7 @@ const PasswordDialog: React.FunctionComponent<PasswordDialogProps> = (
               margin="normal"
               id="confirmPassword"
               label="Confirm Password"
-              type={state.confirmPassword.showPassword ? 'text' : 'password'}
+              type={state.confirmPassword.showPassword ? "text" : "password"}
               fullWidth
               InputProps={{
                 endAdornment: (
