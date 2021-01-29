@@ -23,6 +23,7 @@ import { IBasePayload } from "../models/IPayloads";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Routes from "../constants/Routes";
 import UserDetails from "./UserDetails";
+import NewUserDialog from "./Dialogs/NewUserDialog";
 
 const useStyles = makeStyles((theme) => ({
   rootBox: {
@@ -70,16 +71,19 @@ interface IUserItemsPayload extends IBasePayload {
 // Local state
 interface ILocalState {
   userItems: UserItem[];
+  showNewUserDialog: boolean;
 }
 
 // Local default state
 const DefaultLocalState: ILocalState = {
   userItems: [],
+  showNewUserDialog: false,
 };
 
 // Local actions
 const LocalAction = {
   AddUserItems: "AddUserItems",
+  ToggleNewUserDialog: "ToggleNewUserDialog",
 };
 
 // Local reducer
@@ -91,6 +95,9 @@ const LocalReducer = (
     case LocalAction.AddUserItems: {
       let newItems = (action.payload as IUserItemsPayload).items;
       return { ...state, userItems: [...state.userItems, ...newItems] };
+    }
+    case LocalAction.ToggleNewUserDialog: {
+      return { ...state, showNewUserDialog: !state.showNewUserDialog };
     }
     default: {
       return state;
@@ -160,7 +167,7 @@ const Users: React.FunctionComponent = () => {
             color="primary"
             size="large"
             startIcon={<AddIcon />}
-            onClick={() => {}}
+            onClick={() => dispatch({ type: LocalAction.ToggleNewUserDialog })}
           >
             New User
           </Button>
@@ -235,6 +242,15 @@ const Users: React.FunctionComponent = () => {
           )}
         </Grid>
       </Container>
+
+      <NewUserDialog
+        open={state.showNewUserDialog}
+        onClose={() =>
+          dispatch({
+            type: LocalAction.ToggleNewUserDialog,
+          })
+        }
+      />
     </Box>
   );
 };
