@@ -48,7 +48,7 @@ const App: React.FunctionComponent = () => {
 
         {/* Below goes the controls that have common app layout */}
 
-        <Route path="/">
+        <Route path={[Routes.SCENES, Routes.USERS, Routes.SETTINGS]}>
           <NavBar />
         </Route>
         <Box className={classes.contentBox}>
