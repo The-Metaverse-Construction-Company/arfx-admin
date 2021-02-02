@@ -2,7 +2,7 @@ import { Action } from '@reduxjs/toolkit';
 import { takeLeading, put } from 'redux-saga/effects';
 import { fetchUserData, setUserData } from '../slice/UserSlice';
 
-function* FetchUserDataAync(action: Action) {
+function* FetchUserDataAsync(action: Action) {
   if (fetchUserData.match(action)) {
     const userId = action.payload;
 
@@ -14,5 +14,5 @@ function* FetchUserDataAync(action: Action) {
 }
 
 export default function* () {
-  yield takeLeading(fetchUserData.type, FetchUserDataAync);
+  yield takeLeading(fetchUserData.type, FetchUserDataAsync);
 }
