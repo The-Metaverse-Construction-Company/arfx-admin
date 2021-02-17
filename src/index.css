@@ -1,0 +1,26 @@
+body {
+  position: relative;
+  height: 100vh;
+  margin: 0;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#root {
+  height: 100%;
+  width: 100%;
+}
+::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+::-webkit-scrollbar-track-piece {
+  border: solid 1px black;
+}
+::-webkit-scrollbar-thumb:vertical,
+::-webkit-scrollbar-thumb:horizontal {
+  background: #46484d;
+  border: solid 1px transparent;
+  border-radius: 0px;
+}
