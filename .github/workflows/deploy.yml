@@ -42,8 +42,8 @@ jobs:
          path: build/
          
     - name: Deploy to Azure
-      uses: lauchacarro/Azure-Storage-Action@v1.0
+      uses: TravisSpomer/deploy-to-azure-storage@v1.3.0
       with:
         enabled-static-website: 'true'
-        folder: build/
-        connection-string: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T20:22:04Z&st=2021-02-20T12:22:04Z&spr=https,http&sig=m2P9bSbfW3ayyPJ2PV%2Fsc0SwvzvSWJwBzoJoq9dvJeo%3D
+        source-path: build
+        sas-url: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T20:22:04Z&st=2021-02-20T12:22:04Z&spr=https,http&sig=m2P9bSbfW3ayyPJ2PV%2Fsc0SwvzvSWJwBzoJoq9dvJeo%3D
