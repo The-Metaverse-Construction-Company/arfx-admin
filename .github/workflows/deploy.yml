@@ -25,7 +25,7 @@ jobs:
         
         
     - name: Deploy to Azure
-      uses: deploy-to-azure-storage
+      uses: TravisSpomer/deploy-to-azure-storage@v1.3.0
       with:
         source-path: build
         sas-url: ${{ secrets.DEPLOY_SAS_URL }}
