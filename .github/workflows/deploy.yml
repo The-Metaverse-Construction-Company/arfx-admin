@@ -42,7 +42,7 @@ jobs:
          path: build/
          
     - name: Deploy to Azure
-      uses: The-Metaverse-Construction-Company/arfx-admin/Azure-Storage-Action@master
+      uses: The-Metaverse-Construction-Company/arfx-admin/Azure-Storage-Action@main
       with:
         enabled-static-website: 'true'
         source-path: build/
