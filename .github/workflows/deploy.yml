@@ -46,4 +46,4 @@ jobs:
       with:
         enabled-static-website: 'true'
         source-path: build
-        sas-url: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T21:51:30Z&st=2021-02-20T13:51:30Z&spr=https&sig=dQSLPj6pAJU5QZiPh4nqJ6i5PPjgoFyn3QJYHvdAB34%3D
+        sas-url: https://electronappst.blob.core.windows.net/?sv=2020-02-10&ss=b&srt=sco&sp=rwdlacx&se=2021-02-21T00:03:48Z&st=2021-02-20T16:03:48Z&spr=https&sig=wQBK17d8%2F%2F%2FuWye4XGLaQI2LaBXkEmPjgjwXfgR5T7c%3D
