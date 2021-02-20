@@ -21,10 +21,11 @@ jobs:
     - name: Build website
       run: |
         npm install
-        npm run build
+        yarn build
+        
         
     - name: Deploy to Azure
-      uses: TravisSpomer/deploy-to-azure-storage@v1.3.0
+      uses: deploy-to-azure-storage
       with:
         source-path: build
         sas-url: ${{ secrets.DEPLOY_SAS_URL }}
