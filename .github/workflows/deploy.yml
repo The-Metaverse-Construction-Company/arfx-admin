@@ -1,30 +1,24 @@
-name: Deploy website
+name: Deploy arfx-admin website to azure blob storage
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
-    name: Build and deploy
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-      
+  build:
+    name: Build
+    runs-on: ubuntu-latest    
+    steps:     
     - name: Install Node.js
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
-      
-    - name: Build website
-      run: |
-        npm update
-        npm install
-        npm run build
         
-        
+  Deploy:
+    name: Deploy
+    runs-on: ubuntu-latest 
+    steps:
     - name: Deploy to Azure
       uses: TravisSpomer/deploy-to-azure-storage@v1.3.0
       with:
