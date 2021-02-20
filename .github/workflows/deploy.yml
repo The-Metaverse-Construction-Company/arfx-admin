@@ -46,6 +46,4 @@ jobs:
       with:
         enabled-static-website: 'true'
         source-path: build/
-        index-document: 'index.html'
-        error-document: '404.html'
         sas-url: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T20:22:04Z&st=2021-02-20T12:22:04Z&spr=https,http&sig=m2P9bSbfW3ayyPJ2PV%2Fsc0SwvzvSWJwBzoJoq9dvJeo%3D
