@@ -42,7 +42,8 @@ jobs:
          path: build/
          
     - name: Deploy to Azure
-      uses: TravisSpomer/deploy-to-azure-storage@v1.3.0
+      uses: tibor19/static-website-deploy@v1
       with:
+        enabled-static-website: 'true'
         source-path: build/
         sas-url: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T20:22:04Z&st=2021-02-20T12:22:04Z&spr=https,http&sig=m2P9bSbfW3ayyPJ2PV%2Fsc0SwvzvSWJwBzoJoq9dvJeo%3D
