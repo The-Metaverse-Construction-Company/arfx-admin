@@ -46,5 +46,4 @@ jobs:
       with:
         enabled-static-website: 'true'
         source-path: build
-        sas-token: ?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T21:51:30Z&st=2021-02-20T13:51:30Z&spr=https&sig=dQSLPj6pAJU5QZiPh4nqJ6i5PPjgoFyn3QJYHvdAB34%3D
         sas-url: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T21:51:30Z&st=2021-02-20T13:51:30Z&spr=https&sig=dQSLPj6pAJU5QZiPh4nqJ6i5PPjgoFyn3QJYHvdAB34%3D
