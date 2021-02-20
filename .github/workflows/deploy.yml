@@ -46,4 +46,4 @@ jobs:
       with:
         enabled-static-website: 'true'
         source-path: build
-        sas-url: https://electronapps.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-21T00:57:38Z&st=2021-02-20T16:57:38Z&spr=https&sig=IoVJY%2Bl4rNlYonH5QNWf0JBw0UkQKUM1t2HIjyTynWY%3D
+        sas-url: ${{ secrets.DEPLOY_SAS_URL }}
