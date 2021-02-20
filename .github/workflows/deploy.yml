@@ -45,5 +45,5 @@ jobs:
       uses: lauchacarro/Azure-Storage-Action@v1.0
       with:
         enabled-static-website: 'true'
-        source-path: build/
-        sas-url: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T20:22:04Z&st=2021-02-20T12:22:04Z&spr=https,http&sig=m2P9bSbfW3ayyPJ2PV%2Fsc0SwvzvSWJwBzoJoq9dvJeo%3D
+        folder: build/
+        connection-string: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T20:22:04Z&st=2021-02-20T12:22:04Z&spr=https,http&sig=m2P9bSbfW3ayyPJ2PV%2Fsc0SwvzvSWJwBzoJoq9dvJeo%3D
