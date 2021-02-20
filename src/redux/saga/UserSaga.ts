@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 import { Action } from '@reduxjs/toolkit';
 import { takeLeading, put } from 'redux-saga/effects';
 import { fetchUserData, setUserData } from '../slice/UserSlice';
