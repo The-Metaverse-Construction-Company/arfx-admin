@@ -25,8 +25,7 @@ jobs:
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v2
       with:
-         name: AdminPortal
-         path: /artifacts
+         name: index.html
          retention-days: 1
         
   Deploy:
@@ -38,11 +37,9 @@ jobs:
     - name: Download a single artifact
       uses: actions/download-artifact@v2
       with:
-         name: AdminPortal
-         Path: /artifacts
+         name: index.html
          
     - name: Deploy to Azure
       uses: actions/download-artifact@v2
       with:
-        source-path: /artifacts
         sas-url: https://electronstorageaccount.blob.core.windows.net/?sv=2020-02-10&ss=bfqt&srt=sco&sp=rwdlacupx&se=2021-02-20T16:48:24Z&st=2021-02-20T08:48:24Z&spr=https&sig=KDzBh7N8JL2lEXMhPsTBnP8kbyKi78pPB0MTii3qS58%3D
