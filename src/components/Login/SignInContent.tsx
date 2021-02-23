@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2),
   },
   errorMessage: {
-    color: 'red',
+    color: "red",
   },
 }));
 
@@ -88,7 +88,9 @@ const SignInContent: React.FunctionComponent = () => {
             </Field>
             <ErrorMessage name="email">
               {(msg) => (
-                <Typography className={classes.errorMessage}>{msg}</Typography>
+                <Typography className={classes.errorMessage} variant="body2">
+                  {msg}
+                </Typography>
               )}
             </ErrorMessage>
 
@@ -119,7 +121,9 @@ const SignInContent: React.FunctionComponent = () => {
             </Field>
             <ErrorMessage name="password">
               {(msg) => (
-                <Typography className={classes.errorMessage}>{msg}</Typography>
+                <Typography className={classes.errorMessage} variant="body2">
+                  {msg}
+                </Typography>
               )}
             </ErrorMessage>
 

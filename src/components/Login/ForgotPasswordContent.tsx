@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
 import {
   Box,
   Button,
@@ -7,15 +7,15 @@ import {
   LinearProgress,
   TextField,
   Typography,
-} from '@material-ui/core';
-import { Formik, Form, Field, ErrorMessage, FieldProps } from 'formik';
-import { useHistory } from 'react-router-dom';
-import VerifyContent from './VerifyContent';
-import Routes from '../../constants/Routes';
+} from "@material-ui/core";
+import { Formik, Form, Field, ErrorMessage, FieldProps } from "formik";
+import { useHistory } from "react-router-dom";
+import VerifyContent from "./VerifyContent";
+import Routes from "../../constants/Routes";
 
 const useStyles = makeStyles((theme) => ({
   form: {
-    width: '100%', // Fix IE 11 issue.
+    width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(8),
   },
   submitBtn: {
@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2),
   },
   errorMessage: {
-    color: 'red',
+    color: "red",
   },
 }));
 
@@ -48,16 +48,16 @@ const ForgotPasswordContent: React.FunctionComponent = () => {
         validateOnChange={false}
         validateOnBlur={false}
         initialValues={{
-          email: '',
+          email: "",
         }}
         validate={(values: FormValues) => {
           const errors: Partial<FormValues> = {};
           if (!values.email) {
-            errors.email = 'Required';
+            errors.email = "Required";
           } else if (
             !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
           ) {
-            errors.email = 'Invalid email address';
+            errors.email = "Invalid email address";
           }
           return errors;
         }}
@@ -90,7 +90,9 @@ const ForgotPasswordContent: React.FunctionComponent = () => {
             </Field>
             <ErrorMessage name="email">
               {(msg) => (
-                <Typography className={classes.errorMessage}>{msg}</Typography>
+                <Typography className={classes.errorMessage} variant="body2">
+                  {msg}
+                </Typography>
               )}
             </ErrorMessage>
             {isSubmitting && <LinearProgress />}
