@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Install Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v2
       with:
         node-version: 12.x
         
@@ -21,14 +21,29 @@ jobs:
       run: |
          yarn install
          yarn build
+         
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v2
+      with:
+         name: artifacts
+         path: build/
+         retention-days: 1
         
   Deploy:
     name: Deploy
     needs: Build
     runs-on: ubuntu-latest 
+    
     steps:
+    - name: Download a single artifact
+      uses: actions/download-artifact@v2
+      with:
+         name: artifacts
+         path: build/
+         
     - name: Deploy to Azure
       uses: TravisSpomer/deploy-to-azure-storage@v1.3.0
       with:
+        enabled-static-website: 'true'
         source-path: build
         sas-url: ${{ secrets.DEPLOY_SAS_URL }}
