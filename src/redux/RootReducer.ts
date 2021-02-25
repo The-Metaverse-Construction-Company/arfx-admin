@@ -1,8 +1,10 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import userReducer from './slice/UserSlice';
+import scenesReducer from './slice/ScenesSlice';
+import adminReducer from './slice/AdminSlice';
 
 const rootReducer = combineReducers({
-  user: userReducer,
+  scenes: scenesReducer,
+  admin: adminReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
