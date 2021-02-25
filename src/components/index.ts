@@ -14,6 +14,7 @@ export { default as SceneGrid } from './Common/SceneGrid';
 export * from './Common/SceneGrid';
 
 export { default as NavBar } from './NavBar';
+export { default as ErrorView } from './ErrorView';
 export { default as Scenes } from './Scenes';
 export { default as Users } from './Users';
 export { default as Settings } from './Settings';

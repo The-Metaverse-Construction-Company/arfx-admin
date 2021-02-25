@@ -1,6 +1,6 @@
 import { Box, makeStyles } from "@material-ui/core";
 import React from "react";
-import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
+import { Switch, Route, Redirect, HashRouter } from "react-router-dom";
 import {
   NavBar,
   Settings,
@@ -34,7 +34,7 @@ const App: React.FunctionComponent = () => {
 
   return (
     <>
-      <BrowserRouter>
+      <HashRouter>
         {/* Below goes the controls that have fullscreen layout */}
 
         <Switch>
@@ -66,7 +66,7 @@ const App: React.FunctionComponent = () => {
             />
           </Switch>
         </Box>
-      </BrowserRouter>
+      </HashRouter>
     </>
   );
 };
