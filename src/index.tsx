@@ -1,5 +1,6 @@
 import React from "react";
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
+import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "fontsource-roboto";
 import "./index.css";
@@ -15,7 +16,9 @@ const render = () => {
     <Provider store={store}>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </ThemeProvider>
     </Provider>,
     document.getElementById("root")

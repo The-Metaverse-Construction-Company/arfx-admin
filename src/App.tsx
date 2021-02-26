@@ -1,6 +1,12 @@
 import { Box, makeStyles } from "@material-ui/core";
-import React from "react";
-import { Switch, Route, Redirect, HashRouter } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import {
+  Switch,
+  Route,
+  Redirect,
+  useHistory,
+} from "react-router-dom";
 import {
   NavBar,
   Settings,
@@ -12,6 +18,7 @@ import {
   SceneDetails,
 } from "./components";
 import Routes from "./constants/Routes";
+import { RootState } from "./redux/RootReducer";
 
 // Added scrollbar height for content box using link: https://codesandbox.io/s/rmll8r8qvp?file=/PageContent.jsx
 const useStyles = makeStyles((theme) => ({
@@ -30,43 +37,50 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const App: React.FunctionComponent = () => {
+  const history = useHistory();
   const classes = useStyles();
+  const { success } = useSelector((state: RootState) => state.admin);
+
+  useEffect(() => {
+    if (!success) {
+      history.push(Routes.SIGN_IN);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [success]);
 
   return (
     <>
-      <HashRouter>
-        {/* Below goes the controls that have fullscreen layout */}
+      {/* Below goes the controls that have fullscreen layout */}
 
-        <Switch>
-          <Route exact path="/">
-            <Redirect to={Routes.SIGN_IN} />
-          </Route>
-          <Route exact path={Routes.SIGN_IN}>
-            <LoginContainer content={<SignInContent />} />
-          </Route>
-          <Route exact path={Routes.FORGOT_PASSWORD}>
-            <LoginContainer content={<ForgotPasswordContent />} />
-          </Route>
-        </Switch>
-
-        {/* Below goes the controls that have common app layout */}
-
-        <Route path={[Routes.SCENES, Routes.USERS, Routes.SETTINGS]}>
-          <NavBar />
+      <Switch>
+        <Route exact path="/">
+          <Redirect to={Routes.SIGN_IN} />
         </Route>
-        <Box className={classes.contentBox}>
-          <Switch>
-            <Route exact path={Routes.SCENES} component={Scenes} />
-            <Route path={Routes.USERS} component={Users} />
-            <Route exact path={Routes.SETTINGS} component={Settings} />
-            <Route
-              exact
-              path={[`${Routes.SCENES}/:sceneId`, `${Routes.SCENES}/new`]}
-              component={SceneDetails}
-            />
-          </Switch>
-        </Box>
-      </HashRouter>
+        <Route exact path={Routes.SIGN_IN}>
+          <LoginContainer content={<SignInContent />} />
+        </Route>
+        <Route exact path={Routes.FORGOT_PASSWORD}>
+          <LoginContainer content={<ForgotPasswordContent />} />
+        </Route>
+      </Switch>
+
+      {/* Below goes the controls that have common app layout */}
+
+      <Route path={[Routes.SCENES, Routes.USERS, Routes.SETTINGS]}>
+        <NavBar />
+      </Route>
+      <Box className={classes.contentBox}>
+        <Switch>
+          <Route exact path={Routes.SCENES} component={Scenes} />
+          <Route path={Routes.USERS} component={Users} />
+          <Route exact path={Routes.SETTINGS} component={Settings} />
+          <Route
+            exact
+            path={[`${Routes.SCENES}/:sceneId`, `${Routes.SCENES}/new`]}
+            component={SceneDetails}
+          />
+        </Switch>
+      </Box>
     </>
   );
 };
