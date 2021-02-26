@@ -38,6 +38,9 @@ const App: React.FunctionComponent = () => {
         {/* Below goes the controls that have fullscreen layout */}
 
         <Switch>
+          <Route exact path="/">
+            <Redirect to={Routes.SIGN_IN} />
+          </Route>
           <Route exact path={Routes.SIGN_IN}>
             <LoginContainer content={<SignInContent />} />
           </Route>
@@ -53,9 +56,6 @@ const App: React.FunctionComponent = () => {
         </Route>
         <Box className={classes.contentBox}>
           <Switch>
-            <Route exact path="/">
-              <Redirect to={Routes.SCENES} />
-            </Route>
             <Route exact path={Routes.SCENES} component={Scenes} />
             <Route path={Routes.USERS} component={Users} />
             <Route exact path={Routes.SETTINGS} component={Settings} />

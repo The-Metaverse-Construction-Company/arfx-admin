@@ -8,7 +8,6 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import store from "./redux/Store";
 import axios from "axios";
-import { performAdminLogin } from "./redux/slice/AdminSlice";
 import { darkTheme } from "./utilities/MuiThemes";
 
 const render = () => {
@@ -33,12 +32,12 @@ declare global {
 
 window.Store = store;
 
-// TODO: This is for temporary until login is implemented.
-store.dispatch(performAdminLogin());
-
 axios.interceptors.request.use((config) => {
-  const accessToken = store.getState().admin.result.token;
-  config.headers.Authorization = `Bearer ${accessToken}`;
+  const adminResponse = store.getState().admin.result;
+  if (adminResponse) {
+    const accessToken = adminResponse.token;
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
   return config;
 });
 

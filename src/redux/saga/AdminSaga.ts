@@ -7,7 +7,7 @@ import { performAdminLogin, setAdmin, setAdminError } from '../slice/AdminSlice'
 function* LoginAdminAsync(action: Action) {
   if (performAdminLogin.match(action)) {
     try {
-      const user = yield call(PostLogin);
+      const user = yield call(PostLogin, action.payload);
       yield put(setAdmin(user));
     } catch (err) {
       const error = new Error(err);

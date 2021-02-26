@@ -25,3 +25,8 @@ export interface Email {
   verified: boolean;
   verifiedAt: number;
 }
+
+export interface AdminLoginInfo {
+  username: string;
+  password: string;
+}
