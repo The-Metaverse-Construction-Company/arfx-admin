@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   Grid,
   IconButton,
@@ -9,16 +10,20 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-import React, { useReducer } from "react";
-import { useHistory, useRouteMatch } from "react-router-dom";
+import React, { useEffect, useReducer } from "react";
+import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import { ActionResult } from "../models/Action";
-import { IBasePayload, IFilePayload } from "../models/IPayloads";
+import { IBasePayload, IFilePayload, IScenePayload } from "../models/IPayloads";
 import { ConfirmDialog, ScrollableBox } from ".";
 import ReactPlayer from "react-player";
 import Routes from "../constants/Routes";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloseIcon from "@material-ui/icons/Close";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/RootReducer";
+import { cloneDeep } from "lodash";
+import { SceneData } from "../models/Scenes";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -64,6 +69,19 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     height: "100%",
   },
+  videoLayout: {
+    position: "relative",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  videoSpinner: {
+    position: "absolute",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   videoPlayer: {
     "& video": {
       outline:
@@ -82,10 +100,12 @@ const useStyles = makeStyles((theme) => ({
 
 // Local state
 interface ILocalState {
+  scene?: SceneData;
   sceneImage?: File;
   sceneImageUrl?: string;
   sceneVideo?: File;
   sceneVideoUrl?: string;
+  sceneVideoLoading?: boolean;
   sceneFile?: File;
   showDeleteDialog: boolean;
 }
@@ -99,8 +119,11 @@ const DefaultLocalState: ILocalState = {
 const LocalAction = {
   AddImage: "AddImage",
   AddVideo: "AddVideo",
+  VideoLoaded: "VideoLoaded",
   AddSceneFile: "AddSceneFile",
   ToggleDeleteDialog: "ToggleDeleteDialog",
+  ParseScene: "ParseScene",
+  Reset: "Reset",
 };
 
 // Local reducer
@@ -111,18 +134,37 @@ const LocalReducer = (
   switch (action.type) {
     case LocalAction.AddImage: {
       let file = (action.payload as IFilePayload).file;
+      let url = file ? URL.createObjectURL(file) : undefined;
+
+      if (!url && state.scene) {
+        url = state.scene.thumbnail.blobURL;
+      }
+
       return {
         ...state,
         sceneImage: file,
-        sceneImageUrl: file ? URL.createObjectURL(file) : undefined,
+        sceneImageUrl: url,
       };
     }
     case LocalAction.AddVideo: {
       let file = (action.payload as IFilePayload).file;
+      let url = file ? URL.createObjectURL(file) : undefined;
+
+      if (!url && state.scene) {
+        url = state.scene.previewVideo.blobURL;
+      }
+
       return {
         ...state,
+        sceneVideoLoading: true,
         sceneVideo: file,
-        sceneVideoUrl: file ? URL.createObjectURL(file) : undefined,
+        sceneVideoUrl: url,
+      };
+    }
+    case LocalAction.VideoLoaded: {
+      return {
+        ...state,
+        sceneVideoLoading: false,
       };
     }
     case LocalAction.AddSceneFile: {
@@ -138,6 +180,20 @@ const LocalReducer = (
         showDeleteDialog: !state.showDeleteDialog,
       };
     }
+    case LocalAction.Reset: {
+      return cloneDeep(DefaultLocalState);
+    }
+    case LocalAction.ParseScene: {
+      const scene = (action.payload as IScenePayload).scene;
+
+      return {
+        ...state,
+        scene,
+        sceneImageUrl: scene.thumbnail.blobURL,
+        sceneVideoLoading: true,
+        sceneVideoUrl: scene.previewVideo.blobURL,
+      };
+    }
     default: {
       return state;
     }
@@ -151,6 +207,26 @@ const SceneDetails: React.FunctionComponent = () => {
   const isNewSceneMode = useRouteMatch({
     path: `${Routes.SCENES}/new`,
   });
+  const { sceneId } = useParams<{ sceneId: string }>();
+
+  const scene = useSelector((state: RootState) => {
+    if (sceneId && state.scenes.result) {
+      return state.scenes.result.data.find((item) => item._id === sceneId);
+    }
+    return undefined;
+  });
+
+  useEffect(() => {
+    if (scene) {
+      dispatch({
+        type: LocalAction.ParseScene,
+        payload: { scene },
+      });
+    } else {
+      dispatch({ type: LocalAction.Reset });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const UploadVideoBtn = () => {
     return (
@@ -203,7 +279,7 @@ const SceneDetails: React.FunctionComponent = () => {
             </Typography>
 
             <Box className={classes.previewBox}>
-              {state.sceneImage && (
+              {state.sceneImageUrl && (
                 <img
                   className={classes.previewImg}
                   src={state.sceneImageUrl}
@@ -362,23 +438,35 @@ const SceneDetails: React.FunctionComponent = () => {
                 )}
               </Grid>
 
-              {state.sceneVideo && (
+              {state.sceneVideoUrl && (
                 <Grid item>
                   <UploadVideoBtn />
                 </Grid>
               )}
             </Grid>
 
-            {state.sceneVideo && (
-              <ReactPlayer
-                className={classes.videoPlayer}
-                url={state.sceneVideoUrl}
-                width="100%"
-                height="100%"
-                controls={true}
-              />
-            )}
-            {!state.sceneVideo && (
+            <Box className={classes.videoLayout}>
+              {state.sceneVideoUrl && state.sceneVideoLoading && (
+                <Box className={classes.videoSpinner}>
+                  <CircularProgress />
+                  <Typography>Loading Video</Typography>
+                </Box>
+              )}
+
+              {state.sceneVideoUrl && (
+                <ReactPlayer
+                  className={classes.videoPlayer}
+                  url={state.sceneVideoUrl}
+                  width="100%"
+                  height="100%"
+                  playing
+                  loop
+                  onReady={() => dispatch({ type: LocalAction.VideoLoaded })}
+                />
+              )}
+            </Box>
+
+            {!state.sceneVideoUrl && (
               <Box className={classes.videoBox}>
                 <UploadVideoBtn />
               </Box>
