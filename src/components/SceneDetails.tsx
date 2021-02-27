@@ -7,23 +7,33 @@ import {
   IconButton,
   InputAdornment,
   makeStyles,
+  Snackbar,
   TextField,
   Typography,
 } from "@material-ui/core";
 import React, { useEffect, useReducer } from "react";
 import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import { ActionResult } from "../models/Action";
-import { IBasePayload, IFilePayload, IScenePayload } from "../models/IPayloads";
+import {
+  IBasePayload,
+  IFilePayload,
+  INumberPayload,
+  IScenePayload,
+  IStringPayload,
+} from "../models/IPayloads";
 import { ConfirmDialog, ScrollableBox } from ".";
 import ReactPlayer from "react-player";
 import Routes from "../constants/Routes";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloseIcon from "@material-ui/icons/Close";
-import { useSelector } from "react-redux";
+import MuiAlert from "@material-ui/lab/Alert";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/RootReducer";
 import { cloneDeep } from "lodash";
 import { SceneData } from "../models/Scenes";
+import { createScene } from "../redux/slice/ScenesSlice";
+import { GenerateGuid } from "../utilities/StringHelpers";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -100,6 +110,9 @@ const useStyles = makeStyles((theme) => ({
 
 // Local state
 interface ILocalState {
+  title: string;
+  description: string;
+  price: number;
   scene?: SceneData;
   sceneImage?: File;
   sceneImageUrl?: string;
@@ -107,16 +120,24 @@ interface ILocalState {
   sceneVideoUrl?: string;
   sceneVideoLoading?: boolean;
   sceneFile?: File;
+  error?: string;
   showDeleteDialog: boolean;
 }
 
 // Local default state
 const DefaultLocalState: ILocalState = {
   showDeleteDialog: false,
+  title: '',
+  description: '',
+  price: 0,
 };
 
 // Local actions
 const LocalAction = {
+  SetTitle: "SetTitle",
+  SetDescription: "SetDescription",
+  SetPrice: "SetPrice",
+  SetError: "SetError",
   AddImage: "AddImage",
   AddVideo: "AddVideo",
   VideoLoaded: "VideoLoaded",
@@ -132,6 +153,30 @@ const LocalReducer = (
   action: ActionResult<IBasePayload>
 ): ILocalState => {
   switch (action.type) {
+    case LocalAction.SetTitle: {
+      return {
+        ...state,
+        title: (action.payload as IStringPayload).string,
+      };
+    }
+    case LocalAction.SetDescription: {
+      return {
+        ...state,
+        description: (action.payload as IStringPayload).string,
+      };
+    }
+    case LocalAction.SetPrice: {
+      return {
+        ...state,
+        price: (action.payload as INumberPayload).number,
+      };
+    }
+    case LocalAction.SetError: {
+      return {
+        ...state,
+        error: (action.payload as IStringPayload).string,
+      };
+    }
     case LocalAction.AddImage: {
       let file = (action.payload as IFilePayload).file;
       let url = file ? URL.createObjectURL(file) : undefined;
@@ -180,19 +225,22 @@ const LocalReducer = (
         showDeleteDialog: !state.showDeleteDialog,
       };
     }
-    case LocalAction.Reset: {
-      return cloneDeep(DefaultLocalState);
-    }
     case LocalAction.ParseScene: {
       const scene = (action.payload as IScenePayload).scene;
 
       return {
         ...state,
         scene,
+        title: scene.title,
+        description: scene.description,
+        price: scene.price,
         sceneImageUrl: scene.thumbnail.blobURL,
         sceneVideoLoading: true,
         sceneVideoUrl: scene.previewVideo.blobURL,
       };
+    }
+    case LocalAction.Reset: {
+      return cloneDeep(DefaultLocalState);
     }
     default: {
       return state;
@@ -209,6 +257,7 @@ const SceneDetails: React.FunctionComponent = () => {
   });
   const { sceneId } = useParams<{ sceneId: string }>();
 
+  const reduxDispatch = useDispatch();
   const scene = useSelector((state: RootState) => {
     if (sceneId && state.scenes.result) {
       return state.scenes.result.data.find((item) => item._id === sceneId);
@@ -227,6 +276,33 @@ const SceneDetails: React.FunctionComponent = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onSceneSubmit = () => {
+    let validationError = "";
+    if (!state.title) {
+      validationError = "Title is empty";
+    } else if (!state.description) {
+      validationError = "Description is empty";
+    } else if (!state.price || state.price === 0) {
+      validationError = "Price is empty or zero";
+    }
+
+    if (validationError) {
+      dispatch({
+        type: LocalAction.SetError,
+        payload: { string: validationError },
+      });
+    }
+    else {
+      reduxDispatch(createScene({
+        id: GenerateGuid(),
+        title: state.title!,
+        description: state.description!,
+        price: state.price!,
+      }));
+      history.push(Routes.SCENES);
+    }
+  };
 
   const UploadVideoBtn = () => {
     return (
@@ -266,7 +342,7 @@ const SceneDetails: React.FunctionComponent = () => {
       <Container className={classes.container} disableGutters>
         <Button
           startIcon={<ArrowBackIosIcon />}
-          onClick={() => history.goBack()}
+          onClick={() => history.push(Routes.SCENES)}
         >
           Back
         </Button>
@@ -337,11 +413,19 @@ const SceneDetails: React.FunctionComponent = () => {
             </Button>
 
             <TextField
-              label="Name"
+              label="Title"
               variant="outlined"
               margin="normal"
-              autoComplete="name"
+              autoComplete="title"
+              value={state.title}
               fullWidth
+              onChange={(event) => {
+                const { value } = event.target;
+                dispatch({
+                  type: LocalAction.SetTitle,
+                  payload: { string: value },
+                });
+              }}
             />
 
             <TextField
@@ -349,9 +433,17 @@ const SceneDetails: React.FunctionComponent = () => {
               variant="outlined"
               margin="normal"
               autoComplete="description"
+              value={state.description}
               rows={4}
               fullWidth
               multiline
+              onChange={(event) => {
+                const { value } = event.target;
+                dispatch({
+                  type: LocalAction.SetDescription,
+                  payload: { string: value },
+                });
+              }}
             />
 
             <TextField
@@ -361,10 +453,18 @@ const SceneDetails: React.FunctionComponent = () => {
               margin="normal"
               autoComplete="price"
               type="number"
+              value={state.price}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">$</InputAdornment>
                 ),
+              }}
+              onChange={(event) => {
+                const { value } = event.target;
+                dispatch({
+                  type: LocalAction.SetPrice,
+                  payload: { number: value },
+                });
               }}
             />
 
@@ -476,7 +576,12 @@ const SceneDetails: React.FunctionComponent = () => {
 
         <br />
         <Box className={classes.btnsBox}>
-          <Button component="label" variant="contained" color="primary">
+          <Button
+            component="label"
+            variant="contained"
+            color="primary"
+            onClick={onSceneSubmit}
+          >
             Save Scene
           </Button>
           {!isNewSceneMode && (
@@ -512,6 +617,31 @@ const SceneDetails: React.FunctionComponent = () => {
           })
         }
       />
+
+      <Snackbar
+        open={state.error ? true : false}
+        autoHideDuration={3000}
+        onClose={() =>
+          dispatch({
+            type: LocalAction.SetError,
+            payload: { string: undefined },
+          })
+        }
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          severity="error"
+          onClose={() =>
+            dispatch({
+              type: LocalAction.SetError,
+              payload: { string: undefined },
+            })
+          }
+        >
+          {state.error}
+        </MuiAlert>
+      </Snackbar>
     </ScrollableBox>
   );
 };

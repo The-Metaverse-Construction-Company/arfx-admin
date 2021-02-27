@@ -1,4 +1,4 @@
-import { SceneData } from "./Scenes";
+import { SceneData, SceneStatus } from "./Scenes";
 
 export interface IBasePayload {}
 export interface INumberPayload extends IBasePayload {
@@ -24,4 +24,8 @@ export interface IFilesPayload extends IBasePayload {
 export interface IScenePayload extends IBasePayload {
   key?: string;
   scene: SceneData;
+}
+export interface ISceneStatus extends IBasePayload {
+  key?: string;
+  status: SceneStatus;
 }

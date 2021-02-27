@@ -4,6 +4,12 @@ export interface ScenesResponse {
   errors: string[];
 }
 
+export interface SceneResponse {
+  success: boolean
+  result: SceneData
+  errors: string[]
+}
+
 export interface ScenesResult {
   data: SceneData[];
   total: number;
@@ -15,6 +21,7 @@ export interface SceneData {
   productId: string;
   userId: string;
   published: boolean;
+  deleted: boolean;
   adminAccountId: string;
   purchaseCount: number;
   createdAt: number;
@@ -33,14 +40,48 @@ export interface SceneData {
 
   /** Below properties are for local rendering */
   Error: string;
+  Status: SceneStatus;
 }
 
 export interface ContentZip {
   blobURL: string;
   hash: string;
   version: number;
+  state: number; //1 - completed, 2 - pending, 3 - failed.
 }
 
 export interface BlobItem {
   blobURL: string;
+  state: number; //1 - completed, 2 - pending, 3 - failed.
+}
+
+export enum SceneStatus {
+  None = 0,
+  Creating,
+  Updating,
+  Deleting,
+  Failed,
+  UploadingZipContent,
+  UploadingVideo,
+  UpdatingImage,
+}
+
+export interface CreateScenePayload {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  sceneImage?: File;
+  sceneVideo?: File;
+  sceneFile?: File;
+}
+
+export interface UpdateScenePayload {
+  title: string;
+  description: string;
+  price: number;
+  scene?: SceneData;
+  sceneImage?: File;
+  sceneVideo?: File;
+  sceneFile?: File;
 }
