@@ -21,7 +21,7 @@ export const GetScenes = async (
 };
 
 export const PostScene = async (payload: CreateScenePayload) => {
-  let endpoint = `${Endpoints.HOST}${Endpoints.POST_SCENES}`;
+  let endpoint = `${Endpoints.HOST}${Endpoints.POST_SCENE}`;
 
   const body = {
     name: payload.title,
@@ -33,6 +33,17 @@ export const PostScene = async (payload: CreateScenePayload) => {
   };
 
   const response = await axios.post<SceneResponse>(endpoint, body);
-  const scenes = response.data;
-  return scenes;
+  const scene = response.data;
+  return scene;
 };
+
+export const DeleteScene = async (sceneId: string) => {
+  let route = Endpoints.DELETE_SCENE
+  route = route.replace('{productId}', sceneId);
+  let endpoint = `${Endpoints.HOST}${route}`;
+
+  const response = await axios.delete<SceneResponse>(endpoint);
+  const scene = response.data;
+  return scene;
+};
+

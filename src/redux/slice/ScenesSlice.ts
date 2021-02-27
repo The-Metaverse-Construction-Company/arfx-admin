@@ -63,7 +63,7 @@ const scenesSlice = createSlice({
         price: action.payload.price,
         Status: SceneStatus.Creating,
       } as SceneData;
-      state.result.data = [...state.result.data, newScene];
+      state.result.data = [newScene, ...state.result.data];
     },
     setSceneError(state, action: PayloadAction<IStringPayload>) {
       let newState = cloneDeep(state);
@@ -82,7 +82,7 @@ const scenesSlice = createSlice({
 
       if (scenes) {
         action.payload.scene.Status = SceneStatus.Creating;
-        newState.result.data = [...scenes, action.payload.scene];
+        newState.result.data = [action.payload.scene, ...scenes];
       }
 
       return newState;
@@ -96,6 +96,21 @@ const scenesSlice = createSlice({
       }
 
       return newState;
+    },
+    deleteScene(state, action: PayloadAction<string>) {
+      let newState = cloneDeep(state);
+      let scene = newState.result.data.find(item => item._id === action.payload);
+
+      if (scene) {
+        scene.Status = SceneStatus.Deleting;
+      }
+
+      return newState;
+    },
+    deleteSceneSuccess(state, action: PayloadAction<string>) {
+      let newState = cloneDeep(state);
+      newState.result.data = newState.result.data.filter(item => item._id !== action.payload);
+      return newState;
     }
   },
 });
@@ -108,6 +123,8 @@ export const {
   setSceneError,
   sceneInserted,
   setSceneStatus,
+  deleteScene,
+  deleteSceneSuccess,
 } = scenesSlice.actions;
 
 export default scenesSlice.reducer;

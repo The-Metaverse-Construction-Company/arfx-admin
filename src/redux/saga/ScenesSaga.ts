@@ -1,7 +1,8 @@
 /* eslint-disable import/no-anonymous-default-export */
 import { Action } from "@reduxjs/toolkit";
 import { takeLeading, put, call, select, takeEvery } from "redux-saga/effects";
-import { GetScenes, PostScene } from "../../api/ScenesApi";
+import { DeleteScene, GetScenes, PostScene } from "../../api/ScenesApi";
+import { CreateErrorNotification, CreateSuccessNotification } from "../../models/Notification";
 import { SceneData, SceneStatus } from "../../models/Scenes";
 import { RootState } from "../RootReducer";
 import {
@@ -12,7 +13,10 @@ import {
   setScenesError,
   sceneInserted,
   setSceneStatus,
+  deleteScene,
+  deleteSceneSuccess,
 } from "../slice/ScenesSlice";
+import { addNotification } from "../slice/SettingsSlice";
 
 function* FetchScenesDataAsync(action: Action) {
   if (getScenes.match(action)) {
@@ -55,12 +59,32 @@ function* CreateSceneAsync(action: Action) {
         sceneInserted({ key: action.payload.id, scene: insertedScene! })
       );
 
+      
+      // Show notification
+      yield put(
+        addNotification(
+          CreateSuccessNotification(
+            `${insertedScene!.title} created successfully`
+          )
+        )
+      );
+
       // Update store item state to none to mark scene as created.
       yield put(
         setSceneStatus({ key: insertedScene!._id, status: SceneStatus.None })
       );
     } catch (err) {
       const error = new Error(err);
+
+      // Show notification
+      yield put(
+        addNotification(
+          CreateErrorNotification(
+            `Failed to create scene. ${error.message}`
+          )
+        )
+      );
+
       yield put(
         setSceneError({
           key: insertedScene ? insertedScene._id : action.payload.id,
@@ -71,7 +95,46 @@ function* CreateSceneAsync(action: Action) {
   }
 }
 
+function* DeleteSceneAsync(action: Action) {
+  if (deleteScene.match(action)) {
+    try {
+      const deletedScene = yield call(DeleteScene, action.payload);
+
+      // Show notification
+      yield put(
+        addNotification(
+          CreateSuccessNotification(
+            `${deletedScene.result.title} deleted successfully`
+          )
+        )
+      );
+
+      // Remove it from state
+      yield put(deleteSceneSuccess(action.payload));
+    } catch (err) {
+      const error = new Error(err);
+
+      // Show notification
+      yield put(
+        addNotification(
+          CreateErrorNotification(
+            `Failed to delete scene. ${error.message}`
+          )
+        )
+      );
+      
+      yield put(
+        setSceneError({
+          key: action.payload,
+          string: error.message,
+        })
+      );
+    }
+  }
+}
+
 export default function* () {
   yield takeLeading(getScenes.type, FetchScenesDataAsync);
   yield takeEvery(createScene.type, CreateSceneAsync);
+  yield takeEvery(deleteScene.type, DeleteSceneAsync);
 }

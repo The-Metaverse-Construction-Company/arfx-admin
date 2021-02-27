@@ -151,11 +151,6 @@ const SceneGrid: React.FunctionComponent<WithWidthProps & SceneGridProps> = (
     else return "";
   };
 
-  const showPending = (scene: SceneData) =>
-    (scene.contentZip && scene.contentZip.state !== 1) ||
-    (scene.previewImage && scene.previewImage.state !== 1) ||
-    (scene.previewVideo && scene.previewVideo.state !== 1) ;
-
   if (Props.items.length === 0) {
     return (
       <Typography className={classes.noScenes}>No scenes to display</Typography>
@@ -203,7 +198,7 @@ const SceneGrid: React.FunctionComponent<WithWidthProps & SceneGridProps> = (
                 </Typography>
               </Box>
             )}
-            {showPending(scene) && (
+            {scene.state !== 1 && (
               <Box className={classes.spinnerBox}>
                 <ErrorOutlineIcon className={classes.pendingIcon} titleAccess="The scene needs image, video or content zip to be added"  />
                 <Typography variant="body2">

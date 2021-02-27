@@ -22,6 +22,7 @@ export interface SceneData {
   userId: string;
   published: boolean;
   deleted: boolean;
+  state: number; //1 - completed, 2 - pending, 3 - failed.
   adminAccountId: string;
   purchaseCount: number;
   createdAt: number;

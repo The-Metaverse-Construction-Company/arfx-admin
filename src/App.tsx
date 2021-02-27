@@ -1,12 +1,7 @@
 import { Box, makeStyles } from "@material-ui/core";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import {
-  Switch,
-  Route,
-  Redirect,
-  useHistory,
-} from "react-router-dom";
+import { Switch, Route, Redirect, useHistory } from "react-router-dom";
 import {
   NavBar,
   Settings,
@@ -16,6 +11,7 @@ import {
   Scenes,
   Users,
   SceneDetails,
+  AppCommon,
 } from "./components";
 import Routes from "./constants/Routes";
 import { RootState } from "./redux/RootReducer";
@@ -50,6 +46,7 @@ const App: React.FunctionComponent = () => {
 
   return (
     <>
+      <AppCommon />
       {/* Below goes the controls that have fullscreen layout */}
 
       <Switch>

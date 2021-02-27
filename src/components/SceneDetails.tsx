@@ -7,7 +7,6 @@ import {
   IconButton,
   InputAdornment,
   makeStyles,
-  Snackbar,
   TextField,
   Typography,
 } from "@material-ui/core";
@@ -27,13 +26,14 @@ import Routes from "../constants/Routes";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloseIcon from "@material-ui/icons/Close";
-import MuiAlert from "@material-ui/lab/Alert";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/RootReducer";
 import { cloneDeep } from "lodash";
 import { SceneData } from "../models/Scenes";
-import { createScene } from "../redux/slice/ScenesSlice";
+import { createScene, deleteScene } from "../redux/slice/ScenesSlice";
 import { GenerateGuid } from "../utilities/StringHelpers";
+import { addNotification } from "../redux/slice/SettingsSlice";
+import { CreateErrorNotification } from "../models/Notification";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -103,8 +103,6 @@ const useStyles = makeStyles((theme) => ({
   },
   deleteBtn: {
     margin: theme.spacing(0, 1, 0, 1),
-    background: "transparent",
-    boxShadow: "none",
   },
 }));
 
@@ -120,15 +118,14 @@ interface ILocalState {
   sceneVideoUrl?: string;
   sceneVideoLoading?: boolean;
   sceneFile?: File;
-  error?: string;
   showDeleteDialog: boolean;
 }
 
 // Local default state
 const DefaultLocalState: ILocalState = {
   showDeleteDialog: false,
-  title: '',
-  description: '',
+  title: "",
+  description: "",
   price: 0,
 };
 
@@ -137,7 +134,6 @@ const LocalAction = {
   SetTitle: "SetTitle",
   SetDescription: "SetDescription",
   SetPrice: "SetPrice",
-  SetError: "SetError",
   AddImage: "AddImage",
   AddVideo: "AddVideo",
   VideoLoaded: "VideoLoaded",
@@ -169,12 +165,6 @@ const LocalReducer = (
       return {
         ...state,
         price: (action.payload as INumberPayload).number,
-      };
-    }
-    case LocalAction.SetError: {
-      return {
-        ...state,
-        error: (action.payload as IStringPayload).string,
       };
     }
     case LocalAction.AddImage: {
@@ -288,18 +278,16 @@ const SceneDetails: React.FunctionComponent = () => {
     }
 
     if (validationError) {
-      dispatch({
-        type: LocalAction.SetError,
-        payload: { string: validationError },
-      });
-    }
-    else {
-      reduxDispatch(createScene({
-        id: GenerateGuid(),
-        title: state.title!,
-        description: state.description!,
-        price: state.price!,
-      }));
+      reduxDispatch(addNotification(CreateErrorNotification(validationError)));
+    } else {
+      reduxDispatch(
+        createScene({
+          id: GenerateGuid(),
+          title: state.title!,
+          description: state.description!,
+          price: state.price!,
+        })
+      );
       history.push(Routes.SCENES);
     }
   };
@@ -588,7 +576,7 @@ const SceneDetails: React.FunctionComponent = () => {
             <Button
               className={classes.deleteBtn}
               component="label"
-              variant="contained"
+              variant="outlined"
               color="primary"
               onClick={() =>
                 dispatch({
@@ -611,37 +599,11 @@ const SceneDetails: React.FunctionComponent = () => {
             type: LocalAction.ToggleDeleteDialog,
           })
         }
-        onSuccess={() =>
-          dispatch({
-            type: LocalAction.ToggleDeleteDialog,
-          })
-        }
+        onSuccess={() => {
+          reduxDispatch(deleteScene(sceneId));
+          history.push(Routes.SCENES);
+        }}
       />
-
-      <Snackbar
-        open={state.error ? true : false}
-        autoHideDuration={3000}
-        onClose={() =>
-          dispatch({
-            type: LocalAction.SetError,
-            payload: { string: undefined },
-          })
-        }
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="error"
-          onClose={() =>
-            dispatch({
-              type: LocalAction.SetError,
-              payload: { string: undefined },
-            })
-          }
-        >
-          {state.error}
-        </MuiAlert>
-      </Snackbar>
     </ScrollableBox>
   );
 };
