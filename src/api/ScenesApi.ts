@@ -1,6 +1,12 @@
 import axios from "axios";
 import Endpoints from "../constants/Endpoints";
-import { CreateScenePayload, SceneResponse, ScenesResponse, SceneStatus } from "../models/Scenes";
+import {
+  CreateScenePayload,
+  SceneFileType,
+  SceneResponse,
+  ScenesResponse,
+  SceneStatus,
+} from "../models/Scenes";
 
 export const GetScenes = async (
   pageNo = 1,
@@ -15,7 +21,7 @@ export const GetScenes = async (
   const response = await axios.get<ScenesResponse>(endpoint);
   const scenes = response.data;
 
-  scenes.result.data.forEach((item) => item.Status = SceneStatus.None);
+  scenes.result.data.forEach((item) => (item.Status = SceneStatus.None));
 
   return scenes;
 };
@@ -38,8 +44,8 @@ export const PostScene = async (payload: CreateScenePayload) => {
 };
 
 export const DeleteScene = async (sceneId: string) => {
-  let route = Endpoints.DELETE_SCENE
-  route = route.replace('{productId}', sceneId);
+  let route = Endpoints.DELETE_SCENE;
+  route = route.replace("{productId}", sceneId);
   let endpoint = `${Endpoints.HOST}${route}`;
 
   const response = await axios.delete<SceneResponse>(endpoint);
@@ -47,3 +53,35 @@ export const DeleteScene = async (sceneId: string) => {
   return scene;
 };
 
+export const PostSceneFile = async (
+  sceneId: string,
+  fileType: SceneFileType,
+  file: File
+) => {
+  let route = Endpoints.POST_SCENE_FILE;
+  route = route.replace("{productId}", sceneId);
+
+  if (fileType === SceneFileType.Zip) {
+    route = route.replace("{blobType}", "content-zip");
+  } else if (fileType === SceneFileType.Image) {
+    route = route.replace("{blobType}", "preview-image");
+  } else if (fileType === SceneFileType.Video) {
+    route = route.replace("{blobType}", "preview-video");
+  } else {
+    throw new Error("Invalid file type");
+  }
+
+  let endpoint = `${Endpoints.HOST}${route}`;
+
+  var formData = new FormData();
+  formData.append("blob", file);
+
+  const response = await axios.post<SceneResponse>(endpoint, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  const scene = response.data;
+  return scene;
+};

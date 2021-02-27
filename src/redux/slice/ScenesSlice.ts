@@ -76,12 +76,11 @@ const scenesSlice = createSlice({
 
       return newState;
     },
-    sceneInserted(state, action: PayloadAction<IScenePayload>) {
+    sceneReplace(state, action: PayloadAction<IScenePayload>) {
       let newState = cloneDeep(state);
       let scenes = newState.result.data.filter(item => item._id !== action.payload.key);
 
       if (scenes) {
-        action.payload.scene.Status = SceneStatus.Creating;
         newState.result.data = [action.payload.scene, ...scenes];
       }
 
@@ -121,7 +120,7 @@ export const {
   setScenesError,
   createScene,
   setSceneError,
-  sceneInserted,
+  sceneReplace,
   setSceneStatus,
   deleteScene,
   deleteSceneSuccess,

@@ -62,9 +62,9 @@ export enum SceneStatus {
   Updating,
   Deleting,
   Failed,
-  UploadingZipContent,
+  UploadingZip,
   UploadingVideo,
-  UpdatingImage,
+  UploadingImage,
 }
 
 export interface CreateScenePayload {
@@ -85,4 +85,10 @@ export interface UpdateScenePayload {
   sceneImage?: File;
   sceneVideo?: File;
   sceneFile?: File;
+}
+
+export enum SceneFileType {
+  Zip,
+  Image,
+  Video,
 }

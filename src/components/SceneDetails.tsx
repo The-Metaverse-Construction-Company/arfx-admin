@@ -286,6 +286,9 @@ const SceneDetails: React.FunctionComponent = () => {
           title: state.title!,
           description: state.description!,
           price: state.price!,
+          sceneImage: state.sceneImage,
+          sceneVideo: state.sceneVideo,
+          sceneFile: state.sceneFile,
         })
       );
       history.push(Routes.SCENES);

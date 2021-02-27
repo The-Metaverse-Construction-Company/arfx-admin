@@ -12,7 +12,7 @@ import {
   WithWidthProps,
 } from "@material-ui/core";
 import React from "react";
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import ErrorOutlineIcon from "@material-ui/icons/ErrorOutline";
 import { useHistory } from "react-router-dom";
 import { SceneData, SceneStatus } from "../../models/Scenes";
 
@@ -71,20 +71,20 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     flexDirection: "column",
-    background: 'repeating-linear-gradient(45deg, black, transparent 100px)',
+    background: "repeating-linear-gradient(45deg, black, transparent 100px)",
   },
   linearProgress: {
-    width: '100%',
+    width: "100%",
     height: theme.spacing(1),
     marginBottom: theme.spacing(1),
   },
   errorIcon: {
-    color: 'red',
+    color: "red",
     fontSize: 32,
     margin: theme.spacing(1),
   },
   pendingIcon: {
-    color: 'orange',
+    color: "orange",
     fontSize: 32,
     margin: theme.spacing(1),
   },
@@ -130,23 +130,15 @@ const SceneGrid: React.FunctionComponent<WithWidthProps & SceneGridProps> = (
     return 2;
   };
 
-  const showSpinner = (scene: SceneData) =>
-    scene.Status === SceneStatus.Creating ||
-    scene.Status === SceneStatus.Deleting ||
-    scene.Status === SceneStatus.Updating ||
-    scene.Status === SceneStatus.UpdatingImage ||
-    scene.Status === SceneStatus.UploadingVideo ||
-    scene.Status === SceneStatus.UploadingZipContent;
-
   const getSpinnerMessage = (scene: SceneData) => {
     if (scene.Status === SceneStatus.Creating) return "Creating";
     else if (scene.Status === SceneStatus.Deleting) return "Deleting";
     else if (scene.Status === SceneStatus.Updating) return "Updating";
-    else if (scene.Status === SceneStatus.UpdatingImage)
+    else if (scene.Status === SceneStatus.UploadingImage)
       return "Uploading Image";
     else if (scene.Status === SceneStatus.UploadingVideo)
       return "Uploading Video";
-    else if (scene.Status === SceneStatus.UploadingZipContent)
+    else if (scene.Status === SceneStatus.UploadingZip)
       return "Uploading Scene";
     else return "";
   };
@@ -179,33 +171,39 @@ const SceneGrid: React.FunctionComponent<WithWidthProps & SceneGridProps> = (
               }
             }}
           >
-            {showSpinner(scene) && (
-              <Box className={classes.spinnerBox}>
-                <LinearProgress className={classes.linearProgress} />
-                <Typography variant="body2">
-                  {getSpinnerMessage(scene)}
-                </Typography>
-              </Box>
-            )}
-            {!showSpinner(scene) && scene.thumbnail && scene.thumbnail.blobURL && (
-              <img src={scene.thumbnail.blobURL} alt={scene.title} />
-            )}
+            {scene.Status !== SceneStatus.None &&
+              scene.Status !== SceneStatus.Failed && (
+                <Box className={classes.spinnerBox}>
+                  <LinearProgress className={classes.linearProgress} />
+                  <Typography variant="body2">
+                    {getSpinnerMessage(scene)}
+                  </Typography>
+                </Box>
+              )}
             {scene.Status === SceneStatus.Failed && (
               <Box className={classes.spinnerBox}>
-                <ErrorOutlineIcon className={classes.errorIcon} titleAccess={scene.Error} />
-                <Typography variant="body2">
-                  Failed
-                </Typography>
+                <ErrorOutlineIcon
+                  className={classes.errorIcon}
+                  titleAccess={scene.Error}
+                />
+                <Typography variant="body2">Failed</Typography>
               </Box>
             )}
             {scene.state !== 1 && (
               <Box className={classes.spinnerBox}>
-                <ErrorOutlineIcon className={classes.pendingIcon} titleAccess="The scene needs image, video or content zip to be added"  />
-                <Typography variant="body2">
-                  Pending
-                </Typography>
+                <ErrorOutlineIcon
+                  className={classes.pendingIcon}
+                  titleAccess="The scene needs image, video or content zip to be added"
+                />
+                <Typography variant="body2">Pending</Typography>
               </Box>
             )}
+            {scene.Status === SceneStatus.None &&
+              scene.state === 1 &&
+              scene.thumbnail &&
+              scene.thumbnail.blobURL && (
+                <img src={scene.thumbnail.blobURL} alt={scene.title} />
+              )}
             <GridListTileBar
               className={classes.gridTileBar}
               title={scene.title}
