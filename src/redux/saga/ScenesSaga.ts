@@ -4,6 +4,8 @@ import { takeLeading, put, call, select, takeEvery } from "redux-saga/effects";
 import {
   DeleteScene,
   GetScenes,
+  PatchScene,
+  PatchSceneFile,
   PostScene,
   PostSceneFile,
 } from "../../api/ScenesApi";
@@ -23,6 +25,7 @@ import {
   setSceneStatus,
   deleteScene,
   deleteSceneSuccess,
+  updateScene,
 } from "../slice/ScenesSlice";
 import { addNotification } from "../slice/SettingsSlice";
 
@@ -158,7 +161,7 @@ function* CreateSceneAsync(action: Action) {
       yield put(
         setSceneStatus({ key: insertedScene!._id, status: SceneStatus.None })
       );
-      
+
       // Show notification
       yield put(
         addNotification(
@@ -180,6 +183,144 @@ function* CreateSceneAsync(action: Action) {
       yield put(
         addNotification(
           CreateErrorNotification(`Failed to create scene. ${error.message}`)
+        )
+      );
+    }
+  }
+}
+
+function* UpdateSceneAsync(action: Action) {
+  if (updateScene.match(action)) {
+    let updatedScene: SceneData | undefined;
+    try {
+      // =========================================
+      // 1. Make API call to insert scene metadata
+      // =========================================
+      const metaDataChanged =
+        action.payload.title !== action.payload.scene?.title ||
+        action.payload.description !== action.payload.scene?.description ||
+        action.payload.price !== action.payload.scene?.price;
+      if (metaDataChanged) {
+        const sceneResponse = yield call(PatchScene, action.payload);
+        updatedScene = sceneResponse.result;
+
+        // Replace store with updated item.
+        updatedScene!.Status = SceneStatus.Updating;
+        yield put(
+          sceneReplace({ key: action.payload.id, scene: updatedScene! })
+        );
+      }
+
+      // ============================
+      // 2. Upload image if it exists
+      // ============================
+      if (action.payload.sceneImage) {
+        // Update store item state to uploading image.
+        yield put(
+          setSceneStatus({
+            key: action.payload.id,
+            status: SceneStatus.UploadingImage,
+          })
+        );
+
+        // Make API call to upload scene image.
+        const sceneResponse = yield call(
+          PatchSceneFile,
+          action.payload.id,
+          SceneFileType.Image,
+          action.payload.sceneImage
+        );
+        updatedScene = sceneResponse.result;
+
+        // Replace store with updated item.
+        updatedScene!.Status = SceneStatus.UploadingImage;
+        yield put(
+          sceneReplace({ key: action.payload.id, scene: updatedScene! })
+        );
+      }
+
+      // ============================
+      // 3. Upload video if it exists
+      // ============================
+      if (action.payload.sceneVideo) {
+        // Update store item state to uploading video.
+        yield put(
+          setSceneStatus({
+            key: action.payload.id,
+            status: SceneStatus.UploadingVideo,
+          })
+        );
+
+        // Make API call to upload scene video.
+        const sceneResponse = yield call(
+          PatchSceneFile,
+          action.payload.id,
+          SceneFileType.Video,
+          action.payload.sceneVideo
+        );
+        updatedScene = sceneResponse.result;
+
+        // Replace store with inserted item.
+        updatedScene!.Status = SceneStatus.UploadingVideo;
+        yield put(
+          sceneReplace({ key: action.payload.id, scene: updatedScene! })
+        );
+      }
+
+      // ==========================
+      // 4. Upload zip if it exists
+      // ==========================
+      if (action.payload.sceneFile) {
+        // Update store item state to uploading zip.
+        yield put(
+          setSceneStatus({
+            key: action.payload.id,
+            status: SceneStatus.UploadingZip,
+          })
+        );
+
+        // Make API call to upload scene zip.
+        const sceneResponse = yield call(
+          PatchSceneFile,
+          action.payload.id,
+          SceneFileType.Zip,
+          action.payload.sceneFile
+        );
+        updatedScene = sceneResponse.result;
+
+        // Replace store with inserted item.
+        updatedScene!.Status = SceneStatus.UploadingZip;
+        yield put(
+          sceneReplace({ key: action.payload.id, scene: updatedScene! })
+        );
+      }
+
+      // Update store item state to none to mark scene as updated.
+      yield put(
+        setSceneStatus({ key: action.payload.id, status: SceneStatus.None })
+      );
+
+      // Show notification
+      yield put(
+        addNotification(
+          CreateSuccessNotification(
+            `${updatedScene!.title} updated successfully`
+          )
+        )
+      );
+    } catch (err) {
+      const error = new Error(err);
+      yield put(
+        setSceneError({
+          key: action.payload.id,
+          string: error.message,
+        })
+      );
+
+      // Show notification
+      yield put(
+        addNotification(
+          CreateErrorNotification(`Failed to update scene. ${error.message}`)
         )
       );
     }
@@ -224,5 +365,6 @@ function* DeleteSceneAsync(action: Action) {
 export default function* () {
   yield takeLeading(getScenes.type, FetchScenesDataAsync);
   yield takeEvery(createScene.type, CreateSceneAsync);
+  yield takeEvery(updateScene.type, UpdateSceneAsync);
   yield takeEvery(deleteScene.type, DeleteSceneAsync);
 }

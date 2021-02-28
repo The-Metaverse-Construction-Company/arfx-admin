@@ -67,17 +67,8 @@ export enum SceneStatus {
   UploadingImage,
 }
 
-export interface CreateScenePayload {
+export interface ScenePayload {
   id: string;
-  title: string;
-  description: string;
-  price: number;
-  sceneImage?: File;
-  sceneVideo?: File;
-  sceneFile?: File;
-}
-
-export interface UpdateScenePayload {
   title: string;
   description: string;
   price: number;

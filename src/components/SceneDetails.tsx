@@ -30,7 +30,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/RootReducer";
 import { cloneDeep } from "lodash";
 import { SceneData } from "../models/Scenes";
-import { createScene, deleteScene } from "../redux/slice/ScenesSlice";
+import { createScene, deleteScene, updateScene } from "../redux/slice/ScenesSlice";
 import { GenerateGuid } from "../utilities/StringHelpers";
 import { addNotification } from "../redux/slice/SettingsSlice";
 import { CreateErrorNotification } from "../models/Notification";
@@ -279,13 +279,27 @@ const SceneDetails: React.FunctionComponent = () => {
 
     if (validationError) {
       reduxDispatch(addNotification(CreateErrorNotification(validationError)));
-    } else {
+    } else if (isNewSceneMode) {
       reduxDispatch(
         createScene({
           id: GenerateGuid(),
           title: state.title!,
           description: state.description!,
           price: state.price!,
+          sceneImage: state.sceneImage,
+          sceneVideo: state.sceneVideo,
+          sceneFile: state.sceneFile,
+        })
+      );
+      history.push(Routes.SCENES);
+    } else {
+      reduxDispatch(
+        updateScene({
+          id: sceneId,
+          title: state.title!,
+          description: state.description!,
+          price: state.price!,
+          scene,
           sceneImage: state.sceneImage,
           sceneVideo: state.sceneVideo,
           sceneFile: state.sceneFile,

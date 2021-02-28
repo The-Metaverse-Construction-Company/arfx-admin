@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { cloneDeep } from "lodash";
 import { IScenePayload, ISceneStatus, IStringPayload } from "../../models/IPayloads";
-import { CreateScenePayload, SceneData, ScenesResponse, SceneStatus } from "../../models/Scenes";
+import { ScenePayload, SceneData, ScenesResponse, SceneStatus } from "../../models/Scenes";
 
 type ScenesState = {
   isLoading: boolean;
@@ -54,7 +54,7 @@ const scenesSlice = createSlice({
         isLoadingMore: false,
       };
     },
-    createScene(state, action: PayloadAction<CreateScenePayload>) {
+    createScene(state, action: PayloadAction<ScenePayload>) {
       let newScene = {
         _id: action.payload.id,
         name: action.payload.title,
@@ -64,6 +64,16 @@ const scenesSlice = createSlice({
         Status: SceneStatus.Creating,
       } as SceneData;
       state.result.data = [newScene, ...state.result.data];
+    },
+    updateScene(state, action: PayloadAction<ScenePayload>) {
+      let newState = cloneDeep(state);
+      let scene = newState.result.data.find(item => item._id === action.payload.id);
+
+      if (scene) {
+        scene.Status = SceneStatus.Updating;
+      }
+
+      return newState;
     },
     setSceneError(state, action: PayloadAction<IStringPayload>) {
       let newState = cloneDeep(state);
@@ -119,6 +129,7 @@ export const {
   setScenes,
   setScenesError,
   createScene,
+  updateScene,
   setSceneError,
   sceneReplace,
   setSceneStatus,

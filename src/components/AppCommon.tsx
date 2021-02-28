@@ -13,6 +13,7 @@ const AppCommon: React.FunctionComponent = () => {
     <>
       {notifications.map((item) => (
         <Snackbar
+          key={item.id}
           open
           autoHideDuration={5000}
           onClose={() => dispatch(removeNotification(item.id))}

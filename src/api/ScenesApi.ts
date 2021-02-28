@@ -1,7 +1,7 @@
 import axios from "axios";
 import Endpoints from "../constants/Endpoints";
 import {
-  CreateScenePayload,
+  ScenePayload,
   SceneFileType,
   SceneResponse,
   ScenesResponse,
@@ -26,7 +26,17 @@ export const GetScenes = async (
   return scenes;
 };
 
-export const PostScene = async (payload: CreateScenePayload) => {
+export const DeleteScene = async (sceneId: string) => {
+  let route = Endpoints.DELETE_SCENE;
+  route = route.replace("{productId}", sceneId);
+  let endpoint = `${Endpoints.HOST}${route}`;
+
+  const response = await axios.delete<SceneResponse>(endpoint);
+  const scene = response.data;
+  return scene;
+};
+
+export const PostScene = async (payload: ScenePayload) => {
   let endpoint = `${Endpoints.HOST}${Endpoints.POST_SCENE}`;
 
   const body = {
@@ -39,16 +49,6 @@ export const PostScene = async (payload: CreateScenePayload) => {
   };
 
   const response = await axios.post<SceneResponse>(endpoint, body);
-  const scene = response.data;
-  return scene;
-};
-
-export const DeleteScene = async (sceneId: string) => {
-  let route = Endpoints.DELETE_SCENE;
-  route = route.replace("{productId}", sceneId);
-  let endpoint = `${Endpoints.HOST}${route}`;
-
-  const response = await axios.delete<SceneResponse>(endpoint);
   const scene = response.data;
   return scene;
 };
@@ -77,6 +77,58 @@ export const PostSceneFile = async (
   formData.append("blob", file);
 
   const response = await axios.post<SceneResponse>(endpoint, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  const scene = response.data;
+  return scene;
+};
+
+export const PatchScene = async (payload: ScenePayload) => {
+  let route = Endpoints.PATCH_SCENE;
+  route = route.replace("{productId}", payload.id);
+  let endpoint = `${Endpoints.HOST}${route}`;
+
+  const body = {
+    name: payload.title,
+    title: payload.title,
+    description: payload.description,
+    price: payload.price,
+    discountPercentage: 0,
+    published: true,
+  };
+
+  const response = await axios.patch<SceneResponse>(endpoint, body);
+  const scene = response.data;
+  return scene;
+};
+
+export const PatchSceneFile = async (
+  sceneId: string,
+  fileType: SceneFileType,
+  file: File
+) => {
+  let route = Endpoints.PATCH_SCENE_FILE;
+  route = route.replace("{productId}", sceneId);
+
+  if (fileType === SceneFileType.Zip) {
+    route = route.replace("{blobType}", "content-zip");
+  } else if (fileType === SceneFileType.Image) {
+    route = route.replace("{blobType}", "preview-image");
+  } else if (fileType === SceneFileType.Video) {
+    route = route.replace("{blobType}", "preview-video");
+  } else {
+    throw new Error("Invalid file type");
+  }
+
+  let endpoint = `${Endpoints.HOST}${route}`;
+
+  var formData = new FormData();
+  formData.append("blob", file);
+
+  const response = await axios.patch<SceneResponse>(endpoint, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
