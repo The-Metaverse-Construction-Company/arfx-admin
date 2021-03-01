@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   Grid,
   IconButton,
@@ -9,16 +10,30 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
-import React, { useReducer } from "react";
-import { useHistory, useRouteMatch } from "react-router-dom";
+import React, { useEffect, useReducer } from "react";
+import { useHistory, useParams, useRouteMatch } from "react-router-dom";
 import { ActionResult } from "../models/Action";
-import { IBasePayload, IFilePayload } from "../models/IPayloads";
+import {
+  IBasePayload,
+  IFilePayload,
+  INumberPayload,
+  IScenePayload,
+  IStringPayload,
+} from "../models/IPayloads";
 import { ConfirmDialog, ScrollableBox } from ".";
 import ReactPlayer from "react-player";
 import Routes from "../constants/Routes";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloseIcon from "@material-ui/icons/Close";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/RootReducer";
+import { cloneDeep } from "lodash";
+import { SceneData } from "../models/Scenes";
+import { createScene, deleteScene, updateScene } from "../redux/slice/ScenesSlice";
+import { GenerateGuid } from "../utilities/StringHelpers";
+import { addNotification } from "../redux/slice/SettingsSlice";
+import { CreateErrorNotification } from "../models/Notification";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -64,6 +79,19 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     height: "100%",
   },
+  videoLayout: {
+    position: "relative",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  videoSpinner: {
+    position: "absolute",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   videoPlayer: {
     "& video": {
       outline:
@@ -75,17 +103,20 @@ const useStyles = makeStyles((theme) => ({
   },
   deleteBtn: {
     margin: theme.spacing(0, 1, 0, 1),
-    background: "transparent",
-    boxShadow: "none",
   },
 }));
 
 // Local state
 interface ILocalState {
+  title: string;
+  description: string;
+  price: number;
+  scene?: SceneData;
   sceneImage?: File;
   sceneImageUrl?: string;
   sceneVideo?: File;
   sceneVideoUrl?: string;
+  sceneVideoLoading?: boolean;
   sceneFile?: File;
   showDeleteDialog: boolean;
 }
@@ -93,14 +124,23 @@ interface ILocalState {
 // Local default state
 const DefaultLocalState: ILocalState = {
   showDeleteDialog: false,
+  title: "",
+  description: "",
+  price: 0,
 };
 
 // Local actions
 const LocalAction = {
+  SetTitle: "SetTitle",
+  SetDescription: "SetDescription",
+  SetPrice: "SetPrice",
   AddImage: "AddImage",
   AddVideo: "AddVideo",
+  VideoLoaded: "VideoLoaded",
   AddSceneFile: "AddSceneFile",
   ToggleDeleteDialog: "ToggleDeleteDialog",
+  ParseScene: "ParseScene",
+  Reset: "Reset",
 };
 
 // Local reducer
@@ -109,20 +149,57 @@ const LocalReducer = (
   action: ActionResult<IBasePayload>
 ): ILocalState => {
   switch (action.type) {
+    case LocalAction.SetTitle: {
+      return {
+        ...state,
+        title: (action.payload as IStringPayload).string,
+      };
+    }
+    case LocalAction.SetDescription: {
+      return {
+        ...state,
+        description: (action.payload as IStringPayload).string,
+      };
+    }
+    case LocalAction.SetPrice: {
+      return {
+        ...state,
+        price: (action.payload as INumberPayload).number,
+      };
+    }
     case LocalAction.AddImage: {
       let file = (action.payload as IFilePayload).file;
+      let url = file ? URL.createObjectURL(file) : undefined;
+
+      if (!url && state.scene) {
+        url = state.scene.thumbnail.blobURL;
+      }
+
       return {
         ...state,
         sceneImage: file,
-        sceneImageUrl: file ? URL.createObjectURL(file) : undefined,
+        sceneImageUrl: url,
       };
     }
     case LocalAction.AddVideo: {
       let file = (action.payload as IFilePayload).file;
+      let url = file ? URL.createObjectURL(file) : undefined;
+
+      if (!url && state.scene) {
+        url = state.scene.previewVideo.blobURL;
+      }
+
       return {
         ...state,
+        sceneVideoLoading: true,
         sceneVideo: file,
-        sceneVideoUrl: file ? URL.createObjectURL(file) : undefined,
+        sceneVideoUrl: url,
+      };
+    }
+    case LocalAction.VideoLoaded: {
+      return {
+        ...state,
+        sceneVideoLoading: false,
       };
     }
     case LocalAction.AddSceneFile: {
@@ -138,6 +215,23 @@ const LocalReducer = (
         showDeleteDialog: !state.showDeleteDialog,
       };
     }
+    case LocalAction.ParseScene: {
+      const scene = (action.payload as IScenePayload).scene;
+
+      return {
+        ...state,
+        scene,
+        title: scene.title,
+        description: scene.description,
+        price: scene.price,
+        sceneImageUrl: scene.thumbnail.blobURL,
+        sceneVideoLoading: true,
+        sceneVideoUrl: scene.previewVideo.blobURL,
+      };
+    }
+    case LocalAction.Reset: {
+      return cloneDeep(DefaultLocalState);
+    }
     default: {
       return state;
     }
@@ -151,6 +245,69 @@ const SceneDetails: React.FunctionComponent = () => {
   const isNewSceneMode = useRouteMatch({
     path: `${Routes.SCENES}/new`,
   });
+  const { sceneId } = useParams<{ sceneId: string }>();
+
+  const reduxDispatch = useDispatch();
+  const scene = useSelector((state: RootState) => {
+    if (sceneId && state.scenes.result) {
+      return state.scenes.result.data.find((item) => item._id === sceneId);
+    }
+    return undefined;
+  });
+
+  useEffect(() => {
+    if (scene) {
+      dispatch({
+        type: LocalAction.ParseScene,
+        payload: { scene },
+      });
+    } else {
+      dispatch({ type: LocalAction.Reset });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSceneSubmit = () => {
+    let validationError = "";
+    if (!state.title) {
+      validationError = "Title is empty";
+    } else if (!state.description) {
+      validationError = "Description is empty";
+    } else if (!state.price || state.price === 0) {
+      validationError = "Price is empty or zero";
+    }
+
+    if (validationError) {
+      reduxDispatch(addNotification(CreateErrorNotification(validationError)));
+    } else if (isNewSceneMode) {
+      reduxDispatch(
+        createScene({
+          id: GenerateGuid(),
+          title: state.title!,
+          description: state.description!,
+          price: state.price!,
+          sceneImage: state.sceneImage,
+          sceneVideo: state.sceneVideo,
+          sceneFile: state.sceneFile,
+        })
+      );
+      history.push(Routes.SCENES);
+    } else {
+      reduxDispatch(
+        updateScene({
+          id: sceneId,
+          title: state.title!,
+          description: state.description!,
+          price: state.price!,
+          scene,
+          sceneImage: state.sceneImage,
+          sceneVideo: state.sceneVideo,
+          sceneFile: state.sceneFile,
+        })
+      );
+      history.push(Routes.SCENES);
+    }
+  };
 
   const UploadVideoBtn = () => {
     return (
@@ -190,7 +347,7 @@ const SceneDetails: React.FunctionComponent = () => {
       <Container className={classes.container} disableGutters>
         <Button
           startIcon={<ArrowBackIosIcon />}
-          onClick={() => history.goBack()}
+          onClick={() => history.push(Routes.SCENES)}
         >
           Back
         </Button>
@@ -203,7 +360,7 @@ const SceneDetails: React.FunctionComponent = () => {
             </Typography>
 
             <Box className={classes.previewBox}>
-              {state.sceneImage && (
+              {state.sceneImageUrl && (
                 <img
                   className={classes.previewImg}
                   src={state.sceneImageUrl}
@@ -261,11 +418,19 @@ const SceneDetails: React.FunctionComponent = () => {
             </Button>
 
             <TextField
-              label="Name"
+              label="Title"
               variant="outlined"
               margin="normal"
-              autoComplete="name"
+              autoComplete="title"
+              value={state.title}
               fullWidth
+              onChange={(event) => {
+                const { value } = event.target;
+                dispatch({
+                  type: LocalAction.SetTitle,
+                  payload: { string: value },
+                });
+              }}
             />
 
             <TextField
@@ -273,9 +438,17 @@ const SceneDetails: React.FunctionComponent = () => {
               variant="outlined"
               margin="normal"
               autoComplete="description"
+              value={state.description}
               rows={4}
               fullWidth
               multiline
+              onChange={(event) => {
+                const { value } = event.target;
+                dispatch({
+                  type: LocalAction.SetDescription,
+                  payload: { string: value },
+                });
+              }}
             />
 
             <TextField
@@ -285,10 +458,18 @@ const SceneDetails: React.FunctionComponent = () => {
               margin="normal"
               autoComplete="price"
               type="number"
+              value={state.price}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">$</InputAdornment>
                 ),
+              }}
+              onChange={(event) => {
+                const { value } = event.target;
+                dispatch({
+                  type: LocalAction.SetPrice,
+                  payload: { number: value },
+                });
               }}
             />
 
@@ -362,23 +543,35 @@ const SceneDetails: React.FunctionComponent = () => {
                 )}
               </Grid>
 
-              {state.sceneVideo && (
+              {state.sceneVideoUrl && (
                 <Grid item>
                   <UploadVideoBtn />
                 </Grid>
               )}
             </Grid>
 
-            {state.sceneVideo && (
-              <ReactPlayer
-                className={classes.videoPlayer}
-                url={state.sceneVideoUrl}
-                width="100%"
-                height="100%"
-                controls={true}
-              />
-            )}
-            {!state.sceneVideo && (
+            <Box className={classes.videoLayout}>
+              {state.sceneVideoUrl && state.sceneVideoLoading && (
+                <Box className={classes.videoSpinner}>
+                  <CircularProgress />
+                  <Typography>Loading Video</Typography>
+                </Box>
+              )}
+
+              {state.sceneVideoUrl && (
+                <ReactPlayer
+                  className={classes.videoPlayer}
+                  url={state.sceneVideoUrl}
+                  width="100%"
+                  height="100%"
+                  playing
+                  loop
+                  onReady={() => dispatch({ type: LocalAction.VideoLoaded })}
+                />
+              )}
+            </Box>
+
+            {!state.sceneVideoUrl && (
               <Box className={classes.videoBox}>
                 <UploadVideoBtn />
               </Box>
@@ -388,14 +581,19 @@ const SceneDetails: React.FunctionComponent = () => {
 
         <br />
         <Box className={classes.btnsBox}>
-          <Button component="label" variant="contained" color="primary">
+          <Button
+            component="label"
+            variant="contained"
+            color="primary"
+            onClick={onSceneSubmit}
+          >
             Save Scene
           </Button>
           {!isNewSceneMode && (
             <Button
               className={classes.deleteBtn}
               component="label"
-              variant="contained"
+              variant="outlined"
               color="primary"
               onClick={() =>
                 dispatch({
@@ -418,11 +616,10 @@ const SceneDetails: React.FunctionComponent = () => {
             type: LocalAction.ToggleDeleteDialog,
           })
         }
-        onSuccess={() =>
-          dispatch({
-            type: LocalAction.ToggleDeleteDialog,
-          })
-        }
+        onSuccess={() => {
+          reduxDispatch(deleteScene(sceneId));
+          history.push(Routes.SCENES);
+        }}
       />
     </ScrollableBox>
   );

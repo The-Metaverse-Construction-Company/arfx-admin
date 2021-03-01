@@ -8,11 +8,13 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import React, { useReducer } from "react";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { PasswordDialog, ScrollableBox } from ".";
 import Routes from "../constants/Routes";
 import { ActionResult } from "../models/Action";
 import { IBasePayload } from "../models/IPayloads";
+import { performAdminLogout } from "../redux/slice/AdminSlice";
 
 const useStyles = makeStyles((theme) => ({
   rootBox: {
@@ -84,6 +86,7 @@ const LocalReducer = (
 const Settings: React.FunctionComponent = () => {
   const classes = useStyles();
   const history = useHistory();
+  const reduxDispatch = useDispatch();
   const [state, dispatch] = useReducer(LocalReducer, DefaultLocalState);
 
   const accountOptions: MenuItem[] = [
@@ -91,6 +94,7 @@ const Settings: React.FunctionComponent = () => {
       key: "s1",
       label: "Logout",
       onClick: () => {
+        reduxDispatch(performAdminLogout());
         history.push(Routes.SIGN_IN);
       },
     },

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import {
   Box,
   Button,
@@ -9,15 +9,18 @@ import {
   LinearProgress,
   TextField,
   Typography,
-} from "@material-ui/core";
-import { Formik, Form, Field, ErrorMessage, FieldProps } from "formik";
-import { useHistory } from "react-router-dom";
-import { Visibility, VisibilityOff } from "@material-ui/icons";
-import Routes from "../../constants/Routes";
+} from '@material-ui/core';
+import { Formik, Form, Field, ErrorMessage, FieldProps } from 'formik';
+import { useHistory } from 'react-router-dom';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import Routes from '../../constants/Routes';
+import { RootState } from '../../redux/RootReducer';
+import { performAdminLogin } from '../../redux/slice/AdminSlice';
 
 const useStyles = makeStyles((theme) => ({
   form: {
-    width: "100%", // Fix IE 11 issue.
+    width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(8),
   },
   submitBtn: {
@@ -27,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2),
   },
   errorMessage: {
-    color: "red",
+    color: 'red',
   },
 }));
 
@@ -39,7 +42,18 @@ interface FormValues {
 const SignInContent: React.FunctionComponent = () => {
   const history = useHistory();
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const { success, isLoading, errors } = useSelector(
+    (state: RootState) => state.admin
+  );
   const [showPassword, setShowPassword] = useState<boolean>();
+
+  useEffect(() => {
+    if (success) {
+      history.push(Routes.SCENES);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [success]);
 
   return (
     <Box className={classes.form}>
@@ -47,31 +61,32 @@ const SignInContent: React.FunctionComponent = () => {
         validateOnChange={false}
         validateOnBlur={false}
         initialValues={{
-          email: "",
-          password: "",
+          email: 'testmail0001@mailnesia.com',
+          password: 'test123',
         }}
         validate={(values: FormValues) => {
-          const errors: Partial<FormValues> = {};
+          const validationErrors: Partial<FormValues> = {};
           if (!values.email) {
-            errors.email = "Required";
+            validationErrors.email = 'Required';
           } else if (
             !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
           ) {
-            errors.email = "Invalid email address";
+            validationErrors.email = 'Invalid email address';
           } else if (!values.password) {
-            errors.password = "Required";
+            validationErrors.password = 'Required';
           }
-          return errors;
+          return validationErrors;
         }}
-        onSubmit={(values, { setSubmitting }) => {
-          setTimeout(() => {
-            setSubmitting(false);
-            // alert(JSON.stringify(values, null, 2));
-            history.push(Routes.SCENES);
-          }, 1500);
+        onSubmit={(values) => {
+          dispatch(
+            performAdminLogin({
+              username: values.email,
+              password: values.password,
+            })
+          );
         }}
       >
-        {({ submitForm, isSubmitting }) => (
+        {({ submitForm }) => (
           <Form>
             <Field name="email">
               {({ field }: FieldProps) => (
@@ -80,6 +95,7 @@ const SignInContent: React.FunctionComponent = () => {
                   variant="outlined"
                   margin="normal"
                   autoComplete="email"
+                  disabled={isLoading}
                   fullWidth
                   autoFocus
                   {...field}
@@ -98,10 +114,11 @@ const SignInContent: React.FunctionComponent = () => {
               {({ field }: FieldProps) => (
                 <TextField
                   label="Password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   variant="outlined"
                   margin="normal"
                   autoComplete="current-password"
+                  disabled={isLoading}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -127,14 +144,19 @@ const SignInContent: React.FunctionComponent = () => {
               )}
             </ErrorMessage>
 
-            {isSubmitting && <LinearProgress />}
+            {isLoading && <LinearProgress />}
+            {errors && errors.length > 0 && (
+              <Typography className={classes.errorMessage}>
+                {errors[0]}
+              </Typography>
+            )}
             <br />
             <Button
               className={classes.submitBtn}
               variant="contained"
               color="primary"
               size="large"
-              disabled={isSubmitting}
+              disabled={isLoading}
               onClick={submitForm}
               fullWidth
             >
@@ -143,7 +165,10 @@ const SignInContent: React.FunctionComponent = () => {
 
             <Grid container className={classes.btnsGrid}>
               <Grid item xs>
-                <Button onClick={() => history.push(Routes.FORGOT_PASSWORD)}>
+                <Button
+                  disabled
+                  onClick={() => history.push(Routes.FORGOT_PASSWORD)}
+                >
                   Forgot Password
                 </Button>
               </Grid>

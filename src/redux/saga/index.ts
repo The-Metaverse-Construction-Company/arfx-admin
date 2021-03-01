@@ -1,6 +1,7 @@
 import { all } from 'redux-saga/effects';
-import UserSaga from './UserSaga';
+import AdminSaga from './AdminSaga';
+import ScenesSaga from './ScenesSaga';
 
 export default function* rootSaga() {
-  yield all([UserSaga()]);
+  yield all([ScenesSaga(), AdminSaga()]);
 }
