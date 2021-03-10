@@ -1,13 +1,13 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Box, Button, CssBaseline, Toolbar } from '@material-ui/core';
-import { useHistory, useLocation } from 'react-router-dom';
-import logoImg from '../assets/images/arfx_logo.png';
-import Routes from '../constants/Routes';
+import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import { AppBar, Box, Button, CssBaseline, Link, Toolbar } from "@material-ui/core";
+import { useHistory, useLocation } from "react-router-dom";
+import logoImg from "../assets/images/arfx_logo.png";
+import Routes from "../constants/Routes";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
-    background: 'transparent',
+    background: "transparent",
   },
   logo: {
     height: 60,
@@ -17,8 +17,8 @@ const useStyles = makeStyles((theme) => ({
   },
   menuBtn: {
     margin: theme.spacing(0, 1, 0, 1),
-    background: 'transparent',
-    boxShadow: 'none',
+    background: "transparent",
+    boxShadow: "none",
   },
   menuSelectedBtn: {
     margin: theme.spacing(0, 1, 0, 1),
@@ -42,20 +42,20 @@ const NavBar: React.FunctionComponent = () => {
 
   const menuItems: MenuItem[] = [
     {
-      key: 'scenes',
-      label: 'Scenes',
+      key: "scenes",
+      label: "Scenes",
       link: Routes.SCENES,
       isSelected: currentRoute.startsWith(Routes.SCENES),
     },
+    // {
+    //   key: 'users',
+    //   label: 'Users',
+    //   link: Routes.USERS,
+    //   isSelected: currentRoute.startsWith(Routes.USERS),
+    // },
     {
-      key: 'users',
-      label: 'Users',
-      link: Routes.USERS,
-      isSelected: currentRoute.startsWith(Routes.USERS),
-    },
-    {
-      key: 'settings',
-      label: 'Settings',
+      key: "settings",
+      label: "Settings",
       link: Routes.SETTINGS,
       isSelected: currentRoute.startsWith(Routes.SETTINGS),
     },
@@ -66,7 +66,13 @@ const NavBar: React.FunctionComponent = () => {
       <CssBaseline />
       <AppBar className={classes.appBar} position="sticky">
         <Toolbar>
-          <img className={classes.logo} src={logoImg} alt="ARfx Home Studio" />
+          <Link href="/">
+            <img
+              className={classes.logo}
+              src={logoImg}
+              alt="ARfx Home Studio"
+            />
+          </Link>
           <Box className={classes.buttons}>
             {menuItems.map((item) => {
               return (

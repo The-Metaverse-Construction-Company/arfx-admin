@@ -98,22 +98,22 @@ const Settings: React.FunctionComponent = () => {
         history.push(Routes.SIGN_IN);
       },
     },
-    {
-      key: "s2",
-      label: "Change Password",
-      onClick: () =>
-        dispatch({
-          type: LocalAction.TogglePasswordDialog,
-        }),
-    },
-    {
-      key: "s3",
-      label: "Delete Account",
-      onClick: () =>
-        dispatch({
-          type: LocalAction.ToggleDeleteDialog,
-        }),
-    },
+    // {
+    //   key: "s2",
+    //   label: "Change Password",
+    //   onClick: () =>
+    //     dispatch({
+    //       type: LocalAction.TogglePasswordDialog,
+    //     }),
+    // },
+    // {
+    //   key: "s3",
+    //   label: "Delete Account",
+    //   onClick: () =>
+    //     dispatch({
+    //       type: LocalAction.ToggleDeleteDialog,
+    //     }),
+    // },
   ];
 
   return (

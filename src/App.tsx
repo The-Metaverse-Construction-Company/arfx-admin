@@ -69,7 +69,7 @@ const App: React.FunctionComponent = () => {
       <Box className={classes.contentBox}>
         <Switch>
           <Route exact path={Routes.SCENES} component={Scenes} />
-          <Route path={Routes.USERS} component={Users} />
+          {/* <Route path={Routes.USERS} component={Users} /> */}
           <Route exact path={Routes.SETTINGS} component={Settings} />
           <Route
             exact
