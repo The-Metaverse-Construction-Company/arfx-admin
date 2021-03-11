@@ -9,9 +9,13 @@ export const msalConfig: Configuration = {
     // redirectUri: `http://localhost:3000`,
   },
   cache: {
-    cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
+    cacheLocation: "localStorage",
+    storeAuthStateInCookie: true
   },
+//   cache: {
+//     cacheLocation: "sessionStorage",
+//     storeAuthStateInCookie: false,
+//   },
 };
 
 // Add here scopes for id token to be used at MS Identity Platform endpoints.

@@ -10,17 +10,36 @@ import { Provider } from "react-redux";
 import store from "./redux/Store";
 import axios from "axios";
 import { darkTheme } from "./utilities/MuiThemes";
+import { PublicClientApplication } from "@azure/msal-browser";
+import { loginRequest, msalConfig } from "./msalConfig";
+import { MsalProvider } from "@azure/msal-react";
+
+const msalInstance = new PublicClientApplication(msalConfig);
+
+axios.interceptors.request.use(async (config) => {
+  const tokenResponse = await msalInstance.acquireTokenSilent({
+    account: msalInstance.getAllAccounts()[0],
+    ...loginRequest,
+  });
+  if (tokenResponse) {
+    const accessToken = tokenResponse.accessToken;
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+});
 
 const render = () => {
   ReactDOM.render(
-    <Provider store={store}>
-      <ThemeProvider theme={darkTheme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </ThemeProvider>
-    </Provider>,
+    <MsalProvider instance={msalInstance}>
+      <Provider store={store}>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ThemeProvider>
+      </Provider>
+    </MsalProvider>,
     document.getElementById("root")
   );
 };
@@ -34,15 +53,6 @@ declare global {
 }
 
 window.Store = store;
-
-axios.interceptors.request.use((config) => {
-  const adminResponse = store.getState().admin.result;
-  if (adminResponse) {
-    const accessToken = adminResponse.token;
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-  return config;
-});
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

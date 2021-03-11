@@ -1,20 +1,18 @@
+import { useMsal } from "@azure/msal-react";
 import { Box, makeStyles } from "@material-ui/core";
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { Switch, Route, Redirect, useHistory } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Switch, Route, Redirect } from "react-router-dom";
 import {
   NavBar,
   Settings,
-  ForgotPasswordContent,
-  LoginContainer,
-  SignInContent,
   Scenes,
-  Users,
   SceneDetails,
   AppCommon,
+  LoginContainer,
+  SignInContent,
 } from "./components";
 import Routes from "./constants/Routes";
-import { RootState } from "./redux/RootReducer";
+import { loginRequest } from "./msalConfig";
 
 // Added scrollbar height for content box using link: https://codesandbox.io/s/rmll8r8qvp?file=/PageContent.jsx
 const useStyles = makeStyles((theme) => ({
@@ -33,33 +31,68 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const App: React.FunctionComponent = () => {
-  const history = useHistory();
   const classes = useStyles();
-  const { success } = useSelector((state: RootState) => state.admin);
+  const { instance } = useMsal();
+  const [isAuthenticating, setAuthenticating] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string>("");
 
-  useEffect(() => {
-    if (!success) {
-      history.push(Routes.SIGN_IN);
+  const authenticate = async () => {
+    try {
+      setAuthenticating(true);
+      setAuthError("");
+
+      let tokenResponse = await instance.handleRedirectPromise();
+
+      let accountObj;
+      if (tokenResponse) {
+        accountObj = tokenResponse.account;
+      } else {
+        accountObj = instance.getAllAccounts()[0];
+      }
+
+      if (accountObj && tokenResponse) {
+        console.log("Got valid accountObj and tokenResponse");
+      } else if (accountObj) {
+        console.log("User has logged in, but no tokens.");
+        try {
+          tokenResponse = await instance.acquireTokenSilent({
+            account: instance.getAllAccounts()[0],
+            ...loginRequest,
+          });
+        } catch (err) {
+          console.error("Failed to acquireTokenSilent()", err);
+          await instance.acquireTokenPopup(loginRequest);
+        }
+      } else {
+        console.log(
+          "No accountObject or tokenResponse present. User must now login."
+        );
+        await instance.loginPopup(loginRequest);
+      }
+    } catch (error) {
+      console.error("Failed to handleRedirectPromise()", error);
+      setAuthError(error.message);
     }
+
+    setAuthenticating(false);
+  };
+
+  /**
+   * https://stackoverflow.com/a/63892306/2077741
+   */
+  useEffect(() => {
+    authenticate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success]);
+  }, []);
+
+  if (isAuthenticating || authError) {
+    return <LoginContainer content={<SignInContent error={authError} onRetry={() => authenticate()} />} />;
+  }
 
   return (
     <>
       <AppCommon />
       {/* Below goes the controls that have fullscreen layout */}
-
-      <Switch>
-        <Route exact path="/">
-          <Redirect to={Routes.SIGN_IN} />
-        </Route>
-        <Route exact path={Routes.SIGN_IN}>
-          <LoginContainer content={<SignInContent />} />
-        </Route>
-        <Route exact path={Routes.FORGOT_PASSWORD}>
-          <LoginContainer content={<ForgotPasswordContent />} />
-        </Route>
-      </Switch>
 
       {/* Below goes the controls that have common app layout */}
 
@@ -68,6 +101,9 @@ const App: React.FunctionComponent = () => {
       </Route>
       <Box className={classes.contentBox}>
         <Switch>
+          <Route exact path="/">
+            <Redirect to={Routes.SCENES} />
+          </Route>
           <Route exact path={Routes.SCENES} component={Scenes} />
           {/* <Route path={Routes.USERS} component={Users} /> */}
           <Route exact path={Routes.SETTINGS} component={Settings} />

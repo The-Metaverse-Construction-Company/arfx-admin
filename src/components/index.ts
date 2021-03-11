@@ -6,8 +6,6 @@ export { default as PasswordDialog } from './Dialogs/PasswordDialog';
 
 export { default as LoginContainer } from './Login/LoginContainer';
 export { default as SignInContent } from './Login/SignInContent';
-export { default as ForgotPasswordContent } from './Login/ForgotPasswordContent';
-
 
 export { default as ScrollableBox } from './Common/ScrollableBox';
 export { default as SceneGrid } from './Common/SceneGrid';
