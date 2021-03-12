@@ -261,6 +261,8 @@ const SceneDetails: React.FunctionComponent = () => {
         type: LocalAction.ParseScene,
         payload: { scene },
       });
+    } else if (!isNewSceneMode) {
+      history.push(Routes.SCENES);
     } else {
       dispatch({ type: LocalAction.Reset });
     }
